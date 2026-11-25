@@ -1,0 +1,1516 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --paper:#E8EDF3; --paper2:#DEE5ED;
+  --ink:#2B3445; --ink-soft:#707C8F;
+  --teal:#2E8B74; --teal2:#25715F; --teal-mist:#DCEFE9;
+  --gold:#E5A23F; --gold2:#EFBB6C; --gold-mist:#FBEED7;
+  --coral:#E8635B; --coral-mist:#FBE0DD;
+  --green:#4E9B6E; --green-mist:#E1F1E6;
+  --blue:#4B80C4; --blue-mist:#E5EDFA;
+  --card:#E8EDF3; --line:rgba(43,52,69,.07);
+  --sd: #b9c2cf; --sl:#ffffff;
+  --neu-out: 7px 7px 15px var(--sd), -7px -7px 15px var(--sl);
+  --neu-out-sm: 4px 4px 9px var(--sd), -4px -4px 9px var(--sl);
+  --neu-in: inset 4px 4px 8px var(--sd), inset -4px -4px 8px var(--sl);
+  --neu-in-lg: inset 6px 6px 13px var(--sd), inset -6px -6px 13px var(--sl);
+  --shadow: var(--neu-out);
+}
+*{box-sizing:border-box}
+body,.brgy-root{margin:0;padding:0}
+.brgy-root{
+  font-family:'Inter',sans-serif; color:var(--ink); background:var(--paper);
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+.brgy-root h1,.brgy-root h2,.brgy-root h3,.brgy-root .display{
+  font-family:'Fraunces',serif; letter-spacing:-.01em;
+}
+.mono{font-family:'IBM Plex Mono',monospace}
+button{font-family:inherit; cursor:pointer}
+input,select,textarea{font-family:inherit}
+::selection{background:var(--gold2)}
+.link-like{background:none;border:none;color:var(--teal);font-weight:700;padding:0;text-decoration:underline;font-size:inherit;cursor:pointer}
+
+.app-shell{display:flex; min-height:100vh}
+.sidebar{
+  width:240px; flex-shrink:0; background:var(--paper); color:var(--ink);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  padding:14px; gap:14px;
+}
+.sidebar-brand{padding:14px 12px; display:flex; align-items:center; gap:10px; background:var(--paper); border-radius:16px; box-shadow:var(--neu-out-sm)}
+.brand-mark{
+  width:36px;height:36px;border-radius:12px;background:var(--paper);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'Fraunces',serif; font-weight:700; color:var(--teal); font-size:17px;
+  box-shadow:var(--neu-out-sm);
+}
+.brand-name{font-family:'Fraunces',serif; font-weight:700; font-size:17px; line-height:1.15; color:var(--ink)}
+.brand-sub{font-size:10.5px; color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase; margin-top:2px}
+.nav-list{list-style:none; margin:0; padding:8px; flex:1; background:var(--paper); border-radius:18px; box-shadow:var(--neu-in-lg)}
+.nav-item{
+  display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:12px;
+  color:var(--ink-soft); font-size:14px; font-weight:600; margin-bottom:6px;
+  border:none; background:transparent; width:100%; text-align:left; transition:.15s;
+}
+.nav-item:hover{color:var(--ink)}
+.nav-item.active{background:var(--paper); color:var(--teal); box-shadow:var(--neu-out-sm)}
+.nav-item.active svg{color:var(--teal)}
+.nav-badge{
+  margin-left:auto; background:var(--coral); color:#fff; font-size:10.5px; font-weight:700;
+  padding:1px 6px; border-radius:20px; min-width:16px; text-align:center; box-shadow:2px 2px 5px var(--sd);
+}
+.sidebar-foot{padding:14px; background:var(--paper); border-radius:16px; box-shadow:var(--neu-out-sm)}
+.user-chip{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+.avatar{
+  width:34px;height:34px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+  font-weight:700; font-size:13px; color:#fff; flex-shrink:0; font-family:'Fraunces',serif;
+  box-shadow:var(--neu-out-sm);
+}
+.avatar-img{border-radius:50%; object-fit:cover; flex-shrink:0; display:block; box-shadow:var(--neu-out-sm)}
+.user-chip .uname{font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.2}
+.user-chip .urole{font-size:11px; color:var(--ink-soft); text-transform:capitalize}
+.logout-btn{
+  width:100%; background:var(--paper); border:none; color:var(--ink-soft);
+  padding:9px; border-radius:11px; font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;
+  box-shadow:var(--neu-out-sm);
+}
+.logout-btn:hover{color:var(--coral); box-shadow:var(--neu-in)}
+.logout-btn:active{box-shadow:var(--neu-in)}
+
+.main-col{flex:1; min-width:0; display:flex; flex-direction:column}
+.topbar{
+  display:none; align-items:center; justify-content:space-between; padding:12px 16px;
+  background:var(--paper); color:var(--ink); position:sticky; top:0; z-index:20; box-shadow:var(--neu-out-sm);
+}
+.content{flex:1; padding:28px 32px 90px; max-width:960px; width:100%; margin:0 auto}
+.page-head{margin-bottom:22px}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--gold); font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:''; width:16px; height:2px; background:var(--gold); display:inline-block; border-radius:2px}
+.page-title{font-size:28px; font-weight:700; margin:0 0 4px; color:var(--ink)}
+.page-desc{color:var(--ink-soft); font-size:14.5px; margin:0}
+
+.card{background:var(--card); border:none; border-radius:20px; box-shadow:var(--shadow)}
+.pad{padding:20px}
+.grid{display:grid; gap:20px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:780px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+.stat-card{padding:20px; display:flex; flex-direction:column; gap:6px}
+.stat-num{font-family:'Fraunces',serif; font-size:30px; font-weight:700; color:var(--ink)}
+.stat-label{font-size:12.5px; color:var(--ink-soft); font-weight:500}
+.stat-icon{width:38px;height:38px;border-radius:13px; display:flex;align-items:center;justify-content:center; margin-bottom:4px; background:var(--paper); box-shadow:var(--neu-out-sm)}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:10px 18px; border-radius:12px; font-size:13.5px; font-weight:700; border:none;
+  transition:.15s;
+}
+.btn-primary{background:var(--teal); color:#fff; box-shadow:5px 5px 12px rgba(46,139,116,.35), -3px -3px 8px #ffffffaa}
+.btn-primary:hover{background:var(--teal2)}
+.btn-primary:active{box-shadow:var(--neu-in)}
+.btn-gold{background:var(--gold); color:#5c3c0d; box-shadow:5px 5px 12px rgba(229,162,63,.4), -3px -3px 8px #ffffffaa}
+.btn-gold:hover{background:var(--gold2)}
+.btn-coral{background:var(--coral); color:#fff; box-shadow:5px 5px 12px rgba(232,99,91,.4), -3px -3px 8px #ffffffaa}
+.btn-coral:hover{background:#d9483f}
+.btn-ghost{background:var(--paper); border:none; color:var(--ink); box-shadow:var(--neu-out-sm)}
+.btn-ghost:hover{color:var(--teal)}
+.btn-ghost:active{box-shadow:var(--neu-in)}
+.btn-sm{padding:7px 12px; font-size:12.5px; border-radius:9px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+
+.field{margin-bottom:14px}
+.field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px}
+.field input, .field select, .field textarea{
+  width:100%; padding:11px 13px; border:none; border-radius:12px; font-size:14px;
+  background:var(--paper); color:var(--ink); box-shadow:var(--neu-in);
+}
+.field input:disabled{color:var(--ink-soft)}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none; box-shadow:var(--neu-in), 0 0 0 2px var(--gold2)}
+.field-hint{font-size:11.5px; color:var(--ink-soft); margin-top:5px}
+.field-row{display:flex; gap:10px}
+.field-row .field{flex:1}
+.error-text{font-size:12.5px; color:var(--coral); font-weight:700; margin:-4px 0 12px}
+
+.tag{
+  display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+}
+.tag-update{background:var(--teal-mist); color:var(--teal2)}
+.tag-incident{background:var(--coral-mist); color:var(--coral)}
+.tag-announcement{background:var(--gold-mist); color:#8a5c10}
+.tag-event{background:var(--green-mist); color:var(--green)}
+.sev-critical{background:var(--coral); color:#fff}
+.sev-high{background:var(--coral-mist); color:var(--coral)}
+.sev-medium{background:var(--gold-mist); color:#8a5c10}
+.sev-low{background:var(--paper2); color:var(--ink-soft)}
+
+.post{padding:18px 20px; margin-bottom:16px}
+.post.incident{box-shadow:var(--shadow), inset 4px 0 0 var(--coral)}
+.post.announcement{box-shadow:var(--shadow), inset 4px 0 0 var(--gold)}
+.post.event{box-shadow:var(--shadow), inset 4px 0 0 var(--green)}
+.post-head{display:flex; align-items:flex-start; gap:11px; margin-bottom:10px}
+.post-meta{flex:1; min-width:0}
+.post-name{font-weight:700; font-size:14px}
+.post-sub{font-size:12px; color:var(--ink-soft); margin-top:1px; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.post-body{font-size:14.5px; line-height:1.55; white-space:pre-wrap; margin-bottom:10px}
+.post-photo{width:100%; max-height:320px; object-fit:cover; border-radius:14px; margin-bottom:10px; display:block; box-shadow:var(--neu-out-sm)}
+.post-actions{display:flex; align-items:center; gap:16px; padding-top:12px; box-shadow:inset 0 1px 0 var(--sl), inset 0 2px 0 rgba(43,52,69,.05)}
+.post-action{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--ink-soft); background:none; border:none}
+.post-action:hover{color:var(--teal)}
+.post-action.liked{color:var(--coral)}
+
+.composer{padding:18px 20px}
+.composer-tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap}
+.chip-toggle{
+  padding:7px 15px; border-radius:20px; font-size:12.5px; font-weight:700; border:none;
+  background:var(--paper); color:var(--ink-soft); box-shadow:var(--neu-out-sm);
+}
+.chip-toggle.active{color:var(--teal); box-shadow:var(--neu-in)}
+
+.listing-card{padding:0; overflow:hidden; display:flex; flex-direction:column}
+.listing-img{
+  height:130px; background:linear-gradient(135deg,var(--teal-mist),var(--gold-mist));
+  display:flex; align-items:center; justify-content:center; color:var(--teal); position:relative; overflow:hidden;
+}
+.listing-img img{width:100%; height:100%; object-fit:cover}
+.listing-body{padding:14px 16px; display:flex; flex-direction:column; gap:6px; flex:1}
+.listing-title{font-weight:700; font-size:14.5px}
+.listing-desc{font-size:12.5px; color:var(--ink-soft); line-height:1.4; flex:1}
+.listing-foot{display:flex; align-items:center; justify-content:space-between; margin-top:6px; font-size:11.5px; color:var(--ink-soft)}
+.claimed-badge{position:absolute; top:8px; right:8px; background:var(--ink); color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:20px; text-transform:uppercase}
+
+.empty{text-align:center; padding:50px 20px; color:var(--ink-soft)}
+.empty svg{margin-bottom:10px; opacity:.4}
+
+.bottom-nav{
+  display:none; position:fixed; bottom:10px; left:10px; right:10px; background:var(--paper); z-index:30;
+  padding:8px 4px calc(8px + env(safe-area-inset-bottom)); box-shadow:var(--neu-out); border-radius:20px;
+}
+.bottom-nav-list{display:flex; justify-content:space-around; list-style:none; margin:0; padding:0}
+.bn-item{
+  display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none;
+  color:var(--ink-soft); font-size:10px; font-weight:700; padding:6px 10px; border-radius:12px; position:relative;
+}
+.bn-item.active{color:var(--teal); background:var(--paper); box-shadow:var(--neu-in)}
+.bn-dot{position:absolute; top:2px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--coral); border:2px solid var(--paper)}
+
+.toast-wrap{position:fixed; top:18px; right:18px; z-index:100; display:flex; flex-direction:column; gap:8px; max-width:340px}
+.toast{
+  background:var(--ink); color:#fff; padding:12px 16px; border-radius:14px; font-size:13px; font-weight:500;
+  box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:9px;
+  animation:slidein .25s ease;
+}
+.toast.alert{background:var(--coral)}
+@keyframes slidein{from{opacity:0; transform:translateX(20px)} to{opacity:1; transform:translateX(0)}}
+
+.role-pill{
+  display:inline-block; padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.03em; background:var(--gold-mist); color:#8a5c10;
+}
+.divider{height:1px; background:var(--line); margin:20px 0}
+.section-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:12px}
+
+.onboard-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--paper); padding:20px}
+.onboard-card{background:var(--paper); border-radius:26px; width:100%; max-width:460px; padding:36px 32px; box-shadow:var(--neu-out)}
+.onboard-logo{display:flex; align-items:center; gap:10px; margin-bottom:22px}
+.role-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px}
+.role-opt{
+  border:none; border-radius:14px; padding:13px 12px; text-align:left; background:var(--paper);
+  display:flex; flex-direction:column; gap:2px; box-shadow:var(--neu-out-sm);
+}
+.role-opt.active{box-shadow:var(--neu-in); color:var(--teal)}
+.role-opt strong{font-size:13px}
+.role-opt span{font-size:11px; color:var(--ink-soft)}
+.provider-btn{
+  display:flex; align-items:center; gap:11px; width:100%; padding:13px 16px; border-radius:14px;
+  border:none; background:var(--paper); font-size:13.5px; font-weight:700; color:var(--ink); margin-bottom:10px;
+  box-shadow:var(--neu-out-sm);
+}
+.provider-btn:hover{box-shadow:var(--neu-in)}
+.provider-icon{width:28px;height:28px;border-radius:9px; display:flex;align-items:center;justify-content:center; flex-shrink:0; font-weight:800; font-size:13px; color:#fff; box-shadow:2px 2px 6px rgba(0,0,0,.25)}
+.otp-input{
+  width:100%; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:24px; letter-spacing:.5em;
+  padding:14px; border:none; border-radius:14px; background:var(--paper); box-shadow:var(--neu-in);
+}
+.demo-banner{background:var(--blue-mist); color:var(--blue); border-radius:12px; padding:10px 13px; font-size:12px; margin-bottom:14px; display:flex; gap:8px; align-items:flex-start; line-height:1.4}
+
+.modal-backdrop{position:fixed; inset:0; background:rgba(43,52,69,.35); backdrop-filter:blur(2px); z-index:60; display:flex; align-items:center; justify-content:center; padding:16px}
+.modal{background:var(--paper); border-radius:22px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; padding:24px 26px; box-shadow:var(--neu-out)}
+.modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px}
+.icon-btn{background:var(--paper); border:none; color:var(--ink-soft); padding:6px; border-radius:9px; box-shadow:var(--neu-out-sm)}
+.icon-btn:hover{color:var(--ink)}
+.icon-btn:active{box-shadow:var(--neu-in)}
+
+.list-row{display:flex; align-items:center; gap:12px; padding:12px 4px; box-shadow:inset 0 -1px 0 rgba(43,52,69,.06)}
+.list-row:last-child{box-shadow:none}
+
+.search-bar{display:flex; align-items:center; gap:8px; background:var(--paper); border:none; border-radius:14px; padding:10px 14px; margin-bottom:16px; box-shadow:var(--neu-in)}
+.search-bar input{border:none; outline:none; flex:1; font-size:14px; background:transparent; color:var(--ink)}
+
+.sort-bar{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap}
+.sort-bar select{border:none; background:var(--paper); box-shadow:var(--neu-out-sm); border-radius:20px; padding:7px 13px; font-size:12.5px; color:var(--ink)}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .topbar{display:flex}
+  .content{padding:18px 16px 100px}
+  .bottom-nav{display:block}
+  .grid-3{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .grid-3{grid-template-columns:1fr}
+  .page-title{font-size:23px}
+  .modal{padding:18px}
+}
+</style>
+
+<div id="brgy-app-root"></div>
+
+<script type="text/babel">
+const {useState,useEffect,useMemo,useRef} = React;
+
+/* ---------- storage helpers ---------- */
+const KEY_BARANGAYS='barangays';
+const KEY_POSTS='posts';
+const KEY_LISTINGS='listings';
+const KEY_ACCOUNTS='accounts_directory';
+const KEY_SESSION='session';
+
+async function loadShared(key, fallback){
+  try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : fallback; }
+  catch(e){ return fallback; }
+}
+async function saveShared(key, value){
+  try{ await window.storage.set(key, JSON.stringify(value), true); }catch(e){ console.error('save failed', key, e); }
+}
+async function loadPersonal(key, fallback){
+  try{ const r = await window.storage.get(key, false); return r ? JSON.parse(r.value) : fallback; }
+  catch(e){ return fallback; }
+}
+async function savePersonal(key, value){
+  try{ await window.storage.set(key, JSON.stringify(value), false); }catch(e){ console.error('save failed', key, e); }
+}
+
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const genOtp = () => String(Math.floor(100000 + Math.random()*900000));
+const normalizeEmail = v => (v||'').trim().toLowerCase();
+const normalizeMobile = v => (v||'').replace(/\D/g,'');
+
+function timeAgo(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  if(s<604800) return Math.floor(s/86400)+'d ago';
+  return new Date(ts).toLocaleDateString();
+}
+function haversine(lat1,lon1,lat2,lon2){
+  if([lat1,lon1,lat2,lon2].some(v=>v===undefined||v===null||isNaN(v))) return null;
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+const avatarColors=['#0B3D3A','#D14B3A','#E2A039','#4C7A5C','#6B4C9A','#1E6B8C'];
+function colorFor(str){ let h=0; for(const c of (str||'')) h=(h+c.charCodeAt(0))%avatarColors.length; return avatarColors[h]; }
+function initials(name){ return (name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+function resizeImage(file, maxDim=640, quality=0.6){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>h){ if(w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; } }
+        else { if(h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; } }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror=()=>reject(new Error('image load failed'));
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('file read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function findAccountByEmailOrMobile(accounts,email,mobile){
+  const e=normalizeEmail(email), m=normalizeMobile(mobile);
+  return accounts.find(a => (e && normalizeEmail(a.email)===e) || (m && m.length>=7 && normalizeMobile(a.mobile)===m));
+}
+function findAccountByIdentifier(accounts, identifier){
+  const raw=(identifier||'').trim();
+  const e=normalizeEmail(raw), m=normalizeMobile(raw);
+  return accounts.find(a => normalizeEmail(a.email)===e || (m.length>=7 && normalizeMobile(a.mobile)===m));
+}
+
+/* ---------- seed data: all 33 barangays of Lucena City, Quezon ---------- */
+const SEED_BARANGAYS=[
+  {id:'brgy_1', name:'Barangay 1 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9370, lng:121.6175},
+  {id:'brgy_2', name:'Barangay 2 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9358, lng:121.6140},
+  {id:'brgy_3', name:'Barangay 3 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9345, lng:121.6120},
+  {id:'brgy_4', name:'Barangay 4 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9330, lng:121.6155},
+  {id:'brgy_5', name:'Barangay 5 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9315, lng:121.6170},
+  {id:'brgy_6', name:'Barangay 6 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9300, lng:121.6140},
+  {id:'brgy_7', name:'Barangay 7 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9355, lng:121.6190},
+  {id:'brgy_8', name:'Barangay 8 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9340, lng:121.6200},
+  {id:'brgy_9', name:'Barangay 9 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9325, lng:121.6210},
+  {id:'brgy_10', name:'Barangay 10 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9365, lng:121.6155},
+  {id:'brgy_11', name:'Barangay 11 (Poblacion)', city:'Lucena City', province:'Quezon', lat:13.9310, lng:121.6190},
+  {id:'brgy_barra', name:'Barra', city:'Lucena City', province:'Quezon', lat:13.9020, lng:121.6100},
+  {id:'brgy_bocohan', name:'Bocohan', city:'Lucena City', province:'Quezon', lat:13.9400, lng:121.5850},
+  {id:'brgy_cotta', name:'Cotta', city:'Lucena City', province:'Quezon', lat:13.9150, lng:121.6080},
+  {id:'brgy_dalahican', name:'Dalahican', city:'Lucena City', province:'Quezon', lat:13.9080, lng:121.6180},
+  {id:'brgy_domoit', name:'Domoit', city:'Lucena City', province:'Quezon', lat:13.9200, lng:121.6060},
+  {id:'brgy_gulanggulang', name:'Gulang-Gulang', city:'Lucena City', province:'Quezon', lat:13.9500, lng:121.6100},
+  {id:'brgy_ibabang_dupay', name:'Ibabang Dupay', city:'Lucena City', province:'Quezon', lat:13.9373, lng:121.6210},
+  {id:'brgy_ibabang_iyam', name:'Ibabang Iyam', city:'Lucena City', province:'Quezon', lat:13.9450, lng:121.6350},
+  {id:'brgy_ibabang_talim', name:'Ibabang Talim', city:'Lucena City', province:'Quezon', lat:13.9180, lng:121.6250},
+  {id:'brgy_ilayang_dupay', name:'Ilayang Dupay', city:'Lucena City', province:'Quezon', lat:13.9480, lng:121.6180},
+  {id:'brgy_ilayang_iyam', name:'Ilayang Iyam', city:'Lucena City', province:'Quezon', lat:13.9550, lng:121.6400},
+  {id:'brgy_ilayang_talim', name:'Ilayang Talim', city:'Lucena City', province:'Quezon', lat:13.9260, lng:121.6220},
+  {id:'brgy_isabang', name:'Isabang', city:'Lucena City', province:'Quezon', lat:13.9550, lng:121.6330},
+  {id:'brgy_marketview', name:'Market View', city:'Lucena City', province:'Quezon', lat:13.9500, lng:121.6280},
+  {id:'brgy_mayao_castillo', name:'Mayao Castillo', city:'Lucena City', province:'Quezon', lat:13.9600, lng:121.6250},
+  {id:'brgy_mayao_crossing', name:'Mayao Crossing', city:'Lucena City', province:'Quezon', lat:13.9550, lng:121.6220},
+  {id:'brgy_mayao_kanluran', name:'Mayao Kanluran', city:'Lucena City', province:'Quezon', lat:13.9470, lng:121.6180},
+  {id:'brgy_mayao_parada', name:'Mayao Parada', city:'Lucena City', province:'Quezon', lat:13.9620, lng:121.6300},
+  {id:'brgy_mayao_silangan', name:'Mayao Silangan', city:'Lucena City', province:'Quezon', lat:13.9650, lng:121.6350},
+  {id:'brgy_ransohan', name:'Ransohan', city:'Lucena City', province:'Quezon', lat:13.8990, lng:121.6050},
+  {id:'brgy_salinas', name:'Salinas', city:'Lucena City', province:'Quezon', lat:13.8950, lng:121.6000},
+  {id:'brgy_talaotalao', name:'Talao-Talao', city:'Lucena City', province:'Quezon', lat:13.9260, lng:121.6480},
+];
+
+/* ---------- icons ---------- */
+function Icon({name,size=18,color='currentColor',strokeWidth=2}){
+  const p={fill:'none',stroke:color,strokeWidth,strokeLinecap:'round',strokeLinejoin:'round'};
+  const paths={
+    home:<><path {...p} d="M3 11l9-7 9 7"/><path {...p} d="M5 10v10h14V10"/></>,
+    feed:<><path {...p} d="M4 5h16"/><path {...p} d="M4 12h16"/><path {...p} d="M4 19h10"/></>,
+    market:<><path {...p} d="M4 8l1.5-4h13L20 8"/><path {...p} d="M4 8h16v11H4z"/><path {...p} d="M9 12a3 3 0 0 0 6 0"/></>,
+    user:<><circle {...p} cx="12" cy="8" r="3.5"/><path {...p} d="M5 20c1.5-4 5-5.5 7-5.5s5.5 1.5 7 5.5"/></>,
+    shield:<><path {...p} d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></>,
+    settings:<><circle {...p} cx="12" cy="12" r="2.8"/><path {...p} d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></>,
+    bell:<><path {...p} d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path {...p} d="M10 20a2 2 0 0 0 4 0"/></>,
+    plus:<><path {...p} d="M12 5v14M5 12h14"/></>,
+    search:<><circle {...p} cx="11" cy="11" r="7"/><path {...p} d="M21 21l-4.3-4.3"/></>,
+    pin:<><path {...p} d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle {...p} cx="12" cy="9" r="2.3"/></>,
+    alert:<><path {...p} d="M12 3l10 18H2z"/><path {...p} d="M12 10v4"/><circle cx="12" cy="17" r="0.9" fill={color}/></>,
+    gift:<><rect {...p} x="4" y="9" width="16" height="11"/><path {...p} d="M2 9h20v4H2z"/><path {...p} d="M12 9v11"/><path {...p} d="M12 9c-1.5-4-6-4-6-1.2C6 9 9 9 12 9z"/><path {...p} d="M12 9c1.5-4 6-4 6-1.2C18 9 15 9 12 9z"/></>,
+    calendar:<><rect {...p} x="3" y="5" width="18" height="16" rx="2"/><path {...p} d="M3 10h18M8 3v4M16 3v4"/></>,
+    megaphone:<><path {...p} d="M3 10v4h3l6 4V6l-6 4H3z"/><path {...p} d="M14 8a4 4 0 0 1 0 8"/></>,
+    heart:<><path {...p} d="M12 20s-7-4.4-9.5-8.8C.5 7.5 3 4 6.5 4 9 4 11 6 12 7.5 13 6 15 4 17.5 4 21 4 23.5 7.5 21.5 11.2 19 15.6 12 20 12 20z"/></>,
+    message:<><path {...p} d="M4 4h16v12H8l-4 4z"/></>,
+    logout:<><path {...p} d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path {...p} d="M16 17l5-5-5-5"/><path {...p} d="M21 12H9"/></>,
+    x:<path {...p} d="M18 6L6 18M6 6l12 12"/>,
+    check:<path {...p} d="M4 12l5 5L20 6"/>,
+    chevronRight:<path {...p} d="M9 6l6 6-6 6"/>,
+    edit:<><path {...p} d="M12 20h9"/><path {...p} d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></>,
+    trash:<><path {...p} d="M3 6h18"/><path {...p} d="M8 6V4h8v2"/><path {...p} d="M6 6l1 15h10l1-15"/></>,
+    building:<><rect {...p} x="4" y="3" width="16" height="18"/><path {...p} d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1"/></>,
+    image:<><rect {...p} x="3" y="4" width="18" height="16" rx="2"/><circle {...p} cx="8.5" cy="9.5" r="1.5"/><path {...p} d="M21 16l-5.5-5.5L5 20"/></>,
+    lock:<><rect {...p} x="5" y="11" width="14" height="9" rx="2"/><path {...p} d="M8 11V7a4 4 0 0 1 8 0v4"/></>,
+    phone:<><rect {...p} x="7" y="2" width="10" height="20" rx="2"/><path {...p} d="M11 18h2"/></>,
+    mail:<><rect {...p} x="3" y="5" width="18" height="14" rx="2"/><path {...p} d="M3 7l9 6 9-6"/></>,
+  };
+  return <svg width={size} height={size} viewBox="0 0 24 24">{paths[name]||null}</svg>;
+}
+
+/* ---------- avatar (photo-aware) ---------- */
+function Avatar({name,photo,size=34,fontSize}){
+  if(photo) return <img src={photo} className="avatar-img" style={{width:size,height:size}}/>;
+  return <div className="avatar" style={{width:size,height:size,fontSize:fontSize||Math.round(size*0.38),background:colorFor(name)}}>{initials(name)}</div>;
+}
+
+/* ---------- photo picker ---------- */
+function PhotoPicker({photo,onChange,label,shape='wide'}){
+  const inputRef=useRef(null);
+  const [busy,setBusy]=useState(false);
+  async function handleFile(e){
+    const file=e.target.files[0];
+    if(!file) return;
+    setBusy(true);
+    try{
+      const dataUrl = await resizeImage(file, shape==='avatar'?320:720, shape==='avatar'?0.75:0.6);
+      onChange(dataUrl);
+    }catch(err){ console.error(err); }
+    setBusy(false);
+    e.target.value='';
+  }
+  return (
+    <div>
+      {photo ? (
+        <div style={{position:'relative',display:'inline-block'}}>
+          <img src={photo} style={{
+            width: shape==='avatar'?84:'100%', height: shape==='avatar'?84:150,
+            objectFit:'cover', borderRadius: shape==='avatar'?'50%':10, border:'1px solid var(--line)', display:'block'
+          }}/>
+          <button type="button" className="icon-btn" style={{position:'absolute',top:-8,right: shape==='avatar'?-6:0,background:'#fff',border:'1px solid var(--line)',borderRadius:'50%'}} onClick={()=>onChange(null)}>
+            <Icon name="x" size={13}/>
+          </button>
+          <div style={{marginTop:6}}>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={()=>inputRef.current.click()} disabled={busy}>{busy?'Processing...':'Change photo'}</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-ghost btn-sm" onClick={()=>inputRef.current.click()} disabled={busy}>
+          <Icon name="image" size={14}/> {busy?'Processing...':(label||'Add photo')}
+        </button>
+      )}
+      <input ref={inputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleFile}/>
+    </div>
+  );
+}
+
+/* ---------- toast ---------- */
+function useToasts(){
+  const [toasts,setToasts]=useState([]);
+  const push=(msg,alert)=>{
+    const id=uid();
+    setToasts(t=>[...t,{id,msg,alert}]);
+    setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)), 5200);
+  };
+  return {toasts,push};
+}
+function Toasts({toasts}){
+  return (
+    <div className="toast-wrap">
+      {toasts.map(t=>(
+        <div key={t.id} className={"toast"+(t.alert?' alert':'')}>
+          <Icon name={t.alert?'alert':'check'} size={16}/> <span>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ================= AUTH: signup (Google/Facebook/Mobile/Email) + login + OTP ================= */
+const ROLES=[
+  {id:'resident',label:'Resident',desc:'Register & join your barangay'},
+  {id:'officer',label:'Barangay Officer',desc:'Handle reports & posts'},
+  {id:'captain',label:'Barangay Captain',desc:'Lead your barangay'},
+  {id:'superuser',label:'Superuser',desc:'Manage all barangays'},
+];
+
+function AuthGate({barangays, accounts, onAuthed, push}){
+  const [mode,setMode]=useState('choose'); // choose | details | otp | role | login | login-otp
+  const [provider,setProvider]=useState('email');
+  const [name,setName]=useState('');
+  const [email,setEmail]=useState('');
+  const [mobile,setMobile]=useState('');
+  const [role,setRole]=useState('resident');
+  const [barangayId,setBarangayId]=useState(barangays[0]?.id||'');
+  const [address,setAddress]=useState('');
+  const [otp,setOtp]=useState('');
+  const [sentOtp,setSentOtp]=useState('');
+  const [error,setError]=useState('');
+  const [loginId,setLoginId]=useState('');
+  const [pendingAccount,setPendingAccount]=useState(null);
+
+  function chooseProvider(p){ setProvider(p); setError(''); setMode('details'); }
+
+  function submitDetails(){
+    if(!name.trim() || !email.trim() || !mobile.trim()){ setError('Please fill in your name, email, and mobile number.'); return; }
+    if(!/^\S+@\S+\.\S+$/.test(email.trim())){ setError('Enter a valid email address.'); return; }
+    if(normalizeMobile(mobile).length<10){ setError('Enter a valid mobile number (e.g. 09XX XXX XXXX).'); return; }
+    const dupe=findAccountByEmailOrMobile(accounts,email,mobile);
+    if(dupe){
+      push('An account with that email or mobile number already exists — redirecting you to log in.', true);
+      setLoginId(email.trim());
+      setError('');
+      setMode('login');
+      return;
+    }
+    setError('');
+    const code=genOtp(); setSentOtp(code);
+    push(`🔐 SMS to ${mobile}: "${code} is your Barangay Konek verification code."`, false);
+    setMode('otp');
+  }
+
+  function verifyOtp(next){
+    if(otp.trim()!==sentOtp){ setError('That code doesn\u2019t match. Check the notification and try again.'); return; }
+    setError('');
+    next();
+  }
+
+  function resend(targetMobile){
+    const code=genOtp(); setSentOtp(code); setOtp('');
+    push(`🔐 New code sent to ${targetMobile}: "${code} is your Barangay Konek verification code."`);
+  }
+
+  function finishSignup(){
+    const account={
+      id:uid(), name:name.trim(), email:email.trim(), mobile:mobile.trim(), provider,
+      role, barangayId: role==='superuser'?null:barangayId, address:address.trim(),
+      avatarPhoto:null, notifPrefs:{incidents:true,announcements:true,events:true},
+      createdAt:Date.now(), verified:true,
+    };
+    onAuthed(account,'signup');
+    push(`Welcome, ${account.name.split(' ')[0]}! Your account is verified. 🎉`);
+  }
+
+  function submitLoginIdentify(){
+    const acc=findAccountByIdentifier(accounts, loginId);
+    if(!acc){ setError('No account found with that email or mobile number.'); return; }
+    setError('');
+    setPendingAccount(acc);
+    const code=genOtp(); setSentOtp(code); setOtp('');
+    push(`🔐 SMS to ${acc.mobile}: "${code} is your Barangay Konek login code."`);
+    setMode('login-otp');
+  }
+
+  const providerMeta={
+    google:{label:'Google', color:'#DB4437'},
+    facebook:{label:'Facebook', color:'#1877F2'},
+    mobile:{label:'Mobile Number', color:'var(--teal)'},
+    email:{label:'Email Address', color:'var(--gold)'},
+  };
+
+  return (
+    <div className="onboard-wrap">
+      <div className="onboard-card">
+        <div className="onboard-logo">
+          <div className="brand-mark">B</div>
+          <div>
+            <div className="brand-name" style={{color:'var(--teal)'}}>Barangay Konek</div>
+            <div style={{fontSize:11,color:'var(--ink-soft)',letterSpacing:'.05em',textTransform:'uppercase'}}>Community Registration</div>
+          </div>
+        </div>
+
+        {mode==='choose' && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>Join your barangay</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 18px'}}>Every account is verified with a one-time code sent to your mobile number.</p>
+          <button className="provider-btn" onClick={()=>chooseProvider('google')}>
+            <span className="provider-icon" style={{background:'#DB4437'}}>G</span> Continue with Google
+          </button>
+          <button className="provider-btn" onClick={()=>chooseProvider('facebook')}>
+            <span className="provider-icon" style={{background:'#1877F2'}}>f</span> Continue with Facebook
+          </button>
+          <button className="provider-btn" onClick={()=>chooseProvider('mobile')}>
+            <span className="provider-icon" style={{background:'var(--teal)'}}><Icon name="phone" size={14} color="#fff"/></span> Continue with Mobile Number
+          </button>
+          <button className="provider-btn" onClick={()=>chooseProvider('email')}>
+            <span className="provider-icon" style={{background:'var(--gold)'}}><Icon name="mail" size={14} color="#fff"/></span> Continue with Email Address
+          </button>
+          <div style={{textAlign:'center',fontSize:13,marginTop:14}}>
+            Already registered? <button className="link-like" onClick={()=>{setMode('login'); setError('');}}>Log in</button>
+          </div>
+        </>}
+
+        {mode==='details' && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>{provider==='google'||provider==='facebook' ? `Confirm your ${providerMeta[provider].label} details` : 'Enter your details'}</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 14px'}}>
+            {provider==='google'||provider==='facebook'
+              ? `In production this pre-fills from ${providerMeta[provider].label} sign-in. We still need a mobile number to verify it's really you.`
+              : 'Your email and mobile number must be unique — we check for existing accounts before creating a new one.'}
+          </p>
+          <div className="field"><label>Full name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Juan Dela Cruz" autoFocus/></div>
+          <div className="field"><label>Email address</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="juan@email.com"/></div>
+          <div className="field"><label>Mobile number</label><input value={mobile} onChange={e=>setMobile(e.target.value)} placeholder="09XX XXX XXXX"/>
+            <div className="field-hint">We'll text a verification code here every time you sign up or log in.</div>
+          </div>
+          {error && <div className="error-text">{error}</div>}
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn btn-ghost" onClick={()=>{setMode('choose'); setError('');}}>Back</button>
+            <button className="btn btn-primary btn-block" onClick={submitDetails}>Send verification code</button>
+          </div>
+        </>}
+
+        {mode==='otp' && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>Confirm it's you</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 12px'}}>Enter the 6-digit code we sent to <strong>{mobile}</strong>.</p>
+          <div className="demo-banner"><Icon name="bell" size={15}/> <span>Demo mode: real SMS isn't wired up here, so the code arrives as an in-app notification instead of a text message. In production this is a real SMS via the backend described below.</span></div>
+          <input className="otp-input" maxLength={6} inputMode="numeric" value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,''))} placeholder="000000"/>
+          {error && <div className="error-text" style={{marginTop:10}}>{error}</div>}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',margin:'12px 0 18px'}}>
+            <button className="link-like" style={{fontSize:12.5}} onClick={()=>resend(mobile)}>Resend code</button>
+            <button className="link-like" style={{fontSize:12.5}} onClick={()=>{setMode('details'); setError('');}}>Change number</button>
+          </div>
+          <button className="btn btn-gold btn-block" disabled={otp.length!==6} onClick={()=>verifyOtp(()=>setMode('role'))}>Verify & continue</button>
+        </>}
+
+        {mode==='role' && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>{role==='superuser'?'Confirm access':'Choose your barangay'}</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 14px'}}>This demo lets you preview any role. {role!=='superuser' && 'This links your feed, reports, and listings to your barangay.'}</p>
+          <div className="role-grid">
+            {ROLES.map(r=>(
+              <button key={r.id} className={"role-opt"+(role===r.id?' active':'')} onClick={()=>setRole(r.id)}>
+                <strong>{r.label}</strong><span>{r.desc}</span>
+              </button>
+            ))}
+          </div>
+          {role!=='superuser' && <div className="field" style={{marginTop:10}}>
+            <label>Barangay</label>
+            <select value={barangayId} onChange={e=>setBarangayId(e.target.value)}>
+              {barangays.map(b=><option key={b.id} value={b.id}>{b.name}, {b.city}</option>)}
+            </select>
+          </div>}
+          {role!=='superuser' && <div className="field">
+            <label>House no. / Street (optional)</label>
+            <input value={address} onChange={e=>setAddress(e.target.value)} placeholder="123 Rizal St."/>
+          </div>}
+          <button className="btn btn-gold btn-block" onClick={finishSignup}>Finish setup</button>
+        </>}
+
+        {mode==='login' && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>Log in</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 14px'}}>Enter the email or mobile number you registered with.</p>
+          <div className="field"><label>Email or mobile number</label><input value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="juan@email.com or 09XX XXX XXXX" autoFocus/></div>
+          {error && <div className="error-text">{error}</div>}
+          <button className="btn btn-primary btn-block" onClick={submitLoginIdentify}>Send verification code</button>
+          <div style={{textAlign:'center',fontSize:13,marginTop:14}}>
+            New here? <button className="link-like" onClick={()=>{setMode('choose'); setError('');}}>Create an account</button>
+          </div>
+        </>}
+
+        {mode==='login-otp' && pendingAccount && <>
+          <h2 style={{margin:'0 0 4px',fontSize:20}}>Confirm it's you</h2>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 12px'}}>Enter the 6-digit code we sent to <strong>{pendingAccount.mobile}</strong> to confirm this login attempt.</p>
+          <div className="demo-banner"><Icon name="bell" size={15}/> <span>Demo mode: the code is shown as a notification here instead of a real SMS.</span></div>
+          <input className="otp-input" maxLength={6} inputMode="numeric" value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,''))} placeholder="000000"/>
+          {error && <div className="error-text" style={{marginTop:10}}>{error}</div>}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',margin:'12px 0 18px'}}>
+            <button className="link-like" style={{fontSize:12.5}} onClick={()=>resend(pendingAccount.mobile)}>Resend code</button>
+            <button className="link-like" style={{fontSize:12.5}} onClick={()=>{setMode('login'); setError(''); setOtp('');}}>Not you?</button>
+          </div>
+          <button className="btn btn-gold btn-block" disabled={otp.length!==6} onClick={()=>verifyOtp(()=>{
+            onAuthed(pendingAccount,'login');
+            push(`Welcome back, ${pendingAccount.name.split(' ')[0]}!`);
+          })}>Verify & log in</button>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+/* ================= SIDEBAR / NAV ================= */
+const NAV_ITEMS=(role, pendingIncidents)=>{
+  const items=[
+    {id:'dashboard', label:'Dashboard', icon:'home'},
+    {id:'wall', label:'Community Wall', icon:'feed'},
+    {id:'marketplace', label:'Free Listings', icon:'gift'},
+  ];
+  if(role==='officer'||role==='captain'||role==='superuser'){
+    items.push({id:'admin', label:'Admin Panel', icon:'shield', badge: pendingIncidents>0?pendingIncidents:null});
+  }
+  items.push({id:'profile', label:'Profile & Settings', icon:'settings'});
+  return items;
+};
+
+function Sidebar({view,setView,account,barangayName,onLogout,pendingIncidents}){
+  return (
+    <div className="sidebar">
+      <div className="sidebar-brand">
+        <div className="brand-mark">B</div>
+        <div>
+          <div className="brand-name">Barangay Konek</div>
+          <div className="brand-sub">Community Platform</div>
+        </div>
+      </div>
+      <ul className="nav-list">
+        {NAV_ITEMS(account.role,pendingIncidents).map(it=>(
+          <li key={it.id}>
+            <button className={"nav-item"+(view===it.id?' active':'')} onClick={()=>setView(it.id)}>
+              <Icon name={it.icon} size={17}/>
+              <span>{it.label}</span>
+              {it.badge ? <span className="nav-badge">{it.badge}</span> : null}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="sidebar-foot">
+        <div className="user-chip">
+          <Avatar name={account.name} photo={account.avatarPhoto} size={34}/>
+          <div>
+            <div className="uname">{account.name}</div>
+            <div className="urole">{account.role}{barangayName?` · ${barangayName}`:''}</div>
+          </div>
+        </div>
+        <button className="logout-btn" onClick={onLogout}><Icon name="logout" size={14}/> Log out</button>
+      </div>
+    </div>
+  );
+}
+
+function TopBar({account}){
+  return (
+    <div className="topbar">
+      <div style={{display:'flex',alignItems:'center',gap:9}}>
+        <div className="brand-mark">B</div>
+        <div className="brand-name" style={{color:'var(--ink)',fontSize:15}}>Barangay Konek</div>
+      </div>
+      <Avatar name={account.name} photo={account.avatarPhoto} size={30}/>
+    </div>
+  );
+}
+
+function BottomNav({view,setView,role,pendingIncidents}){
+  const items=NAV_ITEMS(role,pendingIncidents);
+  return (
+    <div className="bottom-nav">
+      <ul className="bottom-nav-list">
+        {items.map(it=>(
+          <li key={it.id} style={{position:'relative'}}>
+            <button className={"bn-item"+(view===it.id?' active':'')} onClick={()=>setView(it.id)}>
+              <Icon name={it.icon} size={19}/>
+              <span>{it.label.split(' ')[0]}</span>
+              {it.badge ? <span className="bn-dot"/> : null}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ================= DASHBOARD ================= */
+function Dashboard({account,barangays,posts,listings,setView}){
+  const barangay=barangays.find(b=>b.id===account.barangayId);
+  const myPosts=posts.filter(p=>account.role==='superuser'?true:p.barangayId===account.barangayId);
+  const incidents=myPosts.filter(p=>p.type==='incident');
+  const openIncidents=incidents.filter(p=>!p.resolved);
+  const announcements=myPosts.filter(p=>p.type==='announcement'||p.type==='event').sort((a,b)=>b.ts-a.ts).slice(0,3);
+  const myListings=listings.filter(l=>account.role==='superuser'?true:l.barangayId===account.barangayId && !l.claimed);
+
+  return (
+    <div>
+      <div className="page-head">
+        <div className="eyebrow">{new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric'})}</div>
+        <h1 className="page-title">
+          {account.role==='superuser' ? 'System Overview' : `Kumusta, ${account.name.split(' ')[0]}!`}
+        </h1>
+        <p className="page-desc">
+          {account.role==='superuser' ? `Monitoring all ${barangays.length} registered barangays.` :
+            `Here's what's happening in ${barangay?barangay.name:'your barangay'} today.`}
+        </p>
+      </div>
+
+      <div className="grid grid-3" style={{marginBottom:20}}>
+        {account.role==='superuser' ? <>
+          <StatCard icon="building" color="teal" num={barangays.length} label="Registered barangays"/>
+          <StatCard icon="feed" color="gold" num={posts.length} label="Total wall posts"/>
+          <StatCard icon="gift" color="green" num={listings.filter(l=>!l.claimed).length} label="Active free listings"/>
+        </> : <>
+          <StatCard icon="alert" color="coral" num={openIncidents.length} label="Open incident reports"/>
+          <StatCard icon="megaphone" color="gold" num={announcements.length} label="Recent announcements"/>
+          <StatCard icon="gift" color="green" num={myListings.length} label="Free items nearby"/>
+        </>}
+      </div>
+
+      {(account.role==='officer'||account.role==='captain') && openIncidents.length>0 && (
+        <div className="card pad" style={{borderLeft:'4px solid var(--coral)', marginBottom:20}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+            <Icon name="alert" color="var(--coral)"/>
+            <strong style={{fontSize:14.5}}>{openIncidents.length} incident{openIncidents.length>1?'s':''} need attention</strong>
+          </div>
+          <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 10px'}}>Residents in {barangay?barangay.name:'your barangay'} have reported active concerns.</p>
+          <button className="btn btn-coral btn-sm" onClick={()=>setView('admin')}>Review reports <Icon name="chevronRight" size={14}/></button>
+        </div>
+      )}
+
+      <div className="grid grid-2">
+        <div className="card pad">
+          <div className="section-label">Latest on the wall</div>
+          {announcements.length===0 ? <p style={{fontSize:13,color:'var(--ink-soft)'}}>No announcements yet.</p> :
+            announcements.map(p=>(
+              <div key={p.id} className="list-row">
+                <span className={"tag tag-"+p.type}>{p.type}</span>
+                <div style={{minWidth:0,flex:1}}>
+                  <div style={{fontSize:13,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.content}</div>
+                  <div style={{fontSize:11,color:'var(--ink-soft)'}}>{timeAgo(p.ts)}</div>
+                </div>
+              </div>
+            ))}
+          <button className="btn btn-ghost btn-sm" style={{marginTop:10}} onClick={()=>setView('wall')}>Go to Community Wall</button>
+        </div>
+        <div className="card pad">
+          <div className="section-label">Free stuff nearby</div>
+          {myListings.length===0 ? <p style={{fontSize:13,color:'var(--ink-soft)'}}>Nothing listed yet — be the first to give something away.</p> :
+            myListings.slice(0,3).map(l=>(
+              <div key={l.id} className="list-row">
+                {l.photo ? <img src={l.photo} style={{width:34,height:34,borderRadius:8,objectFit:'cover',flexShrink:0}}/> :
+                  <div style={{width:34,height:34,borderRadius:8,background:'var(--gold-mist)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    <Icon name="gift" size={16} color="#8a5c10"/>
+                  </div>}
+                <div style={{minWidth:0,flex:1}}>
+                  <div style={{fontSize:13,fontWeight:600}}>{l.title}</div>
+                  <div style={{fontSize:11,color:'var(--ink-soft)'}}>{l.category} · {timeAgo(l.ts)}</div>
+                </div>
+              </div>
+            ))}
+          <button className="btn btn-ghost btn-sm" style={{marginTop:10}} onClick={()=>setView('marketplace')}>Browse Free Listings</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({icon,color,num,label}){
+  const bg={teal:'var(--teal-mist)',gold:'var(--gold-mist)',coral:'var(--coral-mist)',green:'var(--green-mist)'}[color];
+  const fg={teal:'var(--teal)',gold:'#8a5c10',coral:'var(--coral)',green:'var(--green)'}[color];
+  return (
+    <div className="card stat-card">
+      <div className="stat-icon" style={{background:bg}}><Icon name={icon} color={fg} size={17}/></div>
+      <div className="stat-num">{num}</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
+
+/* ================= WALL FEED ================= */
+function WallFeed({account,barangays,posts,setPosts,push}){
+  const [composerType,setComposerType]=useState('update');
+  const [content,setContent]=useState('');
+  const [photo,setPhoto]=useState(null);
+  const [severity,setSeverity]=useState('medium');
+  const [eventDate,setEventDate]=useState('');
+  const [filter,setFilter]=useState('all');
+  const canOfficial = account.role==='officer'||account.role==='captain'||account.role==='superuser';
+  const barangay=barangays.find(b=>b.id===account.barangayId);
+
+  const visible = posts
+    .filter(p=> account.role==='superuser' ? true : p.barangayId===account.barangayId)
+    .filter(p=> filter==='all' ? true : p.type===filter)
+    .sort((a,b)=>b.ts-a.ts);
+
+  function submitPost(){
+    if(!content.trim()) return;
+    const post={
+      id:uid(), authorId:account.id, authorName:account.name, authorPhoto:account.avatarPhoto, role:account.role,
+      barangayId:account.barangayId, type:composerType, content:content.trim(), photo,
+      severity: composerType==='incident'?severity:null,
+      eventDate: composerType==='event'?eventDate:null,
+      ts:Date.now(), likes:[], comments:[], resolved:false,
+    };
+    setPosts(prev=>[post,...prev]);
+    setContent(''); setEventDate(''); setPhoto(null);
+    if(composerType==='incident' && (severity==='high'||severity==='critical')){
+      push(`🚨 Barangay officers of ${barangay?barangay.name:'your area'} have been notified of your ${severity} incident report.`, true);
+    } else if(composerType==='announcement'){
+      push('Announcement posted to your barangay wall.');
+    } else if(composerType==='event'){
+      push('Event added to your barangay wall.');
+    } else {
+      push('Posted to the wall.');
+    }
+  }
+
+  function toggleLike(id){
+    setPosts(prev=>prev.map(p=>{
+      if(p.id!==id) return p;
+      const has=p.likes.includes(account.id);
+      return {...p, likes: has ? p.likes.filter(x=>x!==account.id) : [...p.likes, account.id]};
+    }));
+  }
+  function addComment(id, text){
+    if(!text.trim()) return;
+    setPosts(prev=>prev.map(p=> p.id===id ? {...p, comments:[...p.comments,{id:uid(),authorName:account.name,authorPhoto:account.avatarPhoto,text:text.trim(),ts:Date.now()}]} : p));
+  }
+  function resolveIncident(id){
+    setPosts(prev=>prev.map(p=> p.id===id ? {...p, resolved:true} : p));
+    push('Marked as resolved.');
+  }
+
+  const composerOptions = canOfficial
+    ? [['update','Update'],['incident','Report Incident'],['announcement','Announcement'],['event','Event']]
+    : [['update','Update'],['incident','Report Incident']];
+
+  return (
+    <div>
+      <div className="page-head">
+        <div className="eyebrow">Community Wall</div>
+        <h1 className="page-title">{barangay ? barangay.name : 'All Barangays'}</h1>
+        <p className="page-desc">Updates, incident reports, announcements, and events from your neighbors.</p>
+      </div>
+
+      <div className="card composer" style={{marginBottom:18}}>
+        <div className="composer-tabs">
+          {composerOptions.map(([id,label])=>(
+            <button key={id} className={"chip-toggle"+(composerType===id?' active':'')} onClick={()=>setComposerType(id)}>{label}</button>
+          ))}
+        </div>
+        <textarea rows={composerType==='update'?2:3} placeholder={
+          composerType==='incident' ? "Describe the incident — what's happening and where?" :
+          composerType==='announcement' ? "Share an official announcement..." :
+          composerType==='event' ? "Describe the event..." : "What's happening in the barangay?"
+        } value={content} onChange={e=>setContent(e.target.value)} style={{width:'100%',border:'1px solid var(--line)',borderRadius:9,padding:'10px 12px',fontSize:14,resize:'vertical'}}/>
+
+        {composerType==='incident' && (
+          <div className="field-row" style={{marginTop:10}}>
+            <div className="field" style={{marginBottom:0}}>
+              <label>Severity</label>
+              <select value={severity} onChange={e=>setSeverity(e.target.value)}>
+                <option value="low">Low</option><option value="medium">Medium</option>
+                <option value="high">High — notify officers</option><option value="critical">Critical — emergency</option>
+              </select>
+            </div>
+            <div className="field" style={{marginBottom:0}}>
+              <label>Location</label>
+              <input disabled value={`📍 Auto: ${barangay?barangay.name:'—'}`} />
+            </div>
+          </div>
+        )}
+        {composerType==='event' && (
+          <div className="field" style={{marginTop:10,marginBottom:0}}>
+            <label>Event date</label>
+            <input type="date" value={eventDate} onChange={e=>setEventDate(e.target.value)}/>
+          </div>
+        )}
+        <div style={{marginTop:10}}>
+          <PhotoPicker photo={photo} onChange={setPhoto} label={composerType==='incident' ? 'Attach photo evidence' : 'Attach photo'}/>
+        </div>
+        <div style={{display:'flex',justifyContent:'flex-end',marginTop:12}}>
+          <button className={"btn "+(composerType==='incident'?'btn-coral':'btn-primary')} disabled={!content.trim()} onClick={submitPost}>
+            {composerType==='incident' ? <><Icon name="alert" size={14}/> Report</> : <>Post</>}
+          </button>
+        </div>
+      </div>
+
+      <div className="sort-bar">
+        {[['all','All'],['update','Updates'],['incident','Incidents'],['announcement','Announcements'],['event','Events']].map(([id,label])=>(
+          <button key={id} className={"chip-toggle"+(filter===id?' active':'')} onClick={()=>setFilter(id)}>{label}</button>
+        ))}
+      </div>
+
+      {visible.length===0 ? (
+        <div className="empty"><Icon name="feed" size={40}/><div>Nothing here yet. Be the first to post.</div></div>
+      ) : visible.map(p=><PostCard key={p.id} post={p} account={account} barangays={barangays} onLike={toggleLike} onComment={addComment} onResolve={resolveIncident}/>)}
+    </div>
+  );
+}
+
+function PostCard({post,account,barangays,onLike,onComment,onResolve}){
+  const [commentText,setCommentText]=useState('');
+  const [showComments,setShowComments]=useState(false);
+  const liked=post.likes.includes(account.id);
+  const canResolve=(account.role==='officer'||account.role==='captain'||account.role==='superuser') && post.type==='incident';
+  const bgy=barangays.find(b=>b.id===post.barangayId);
+  return (
+    <div className={"card post "+post.type}>
+      <div className="post-head">
+        <Avatar name={post.authorName} photo={post.authorPhoto} size={34}/>
+        <div className="post-meta">
+          <div className="post-name">{post.authorName} {(post.role==='officer'||post.role==='captain') && <span className="role-pill" style={{marginLeft:6}}>{post.role}</span>}</div>
+          <div className="post-sub">
+            <span className={"tag tag-"+post.type}>{post.type}</span>
+            {post.severity && <span className={"tag sev-"+post.severity}>{post.severity}</span>}
+            {post.resolved && <span className="tag" style={{background:'var(--green-mist)',color:'var(--green)'}}>resolved</span>}
+            <span>· {timeAgo(post.ts)}</span>
+            {account.role==='superuser' && bgy && <span>· {bgy.name}</span>}
+            {post.eventDate && <span className="mono">· 📅 {post.eventDate}</span>}
+          </div>
+        </div>
+      </div>
+      <div className="post-body">{post.content}</div>
+      {post.photo && <img src={post.photo} className="post-photo"/>}
+      <div className="post-actions">
+        <button className={"post-action"+(liked?' liked':'')} onClick={()=>onLike(post.id)}><Icon name="heart" size={15}/> {post.likes.length||''} Like</button>
+        <button className="post-action" onClick={()=>setShowComments(s=>!s)}><Icon name="message" size={15}/> {post.comments.length||''} Comment</button>
+        {canResolve && !post.resolved && <button className="post-action" style={{marginLeft:'auto'}} onClick={()=>onResolve(post.id)}><Icon name="check" size={15}/> Mark resolved</button>}
+      </div>
+      {showComments && (
+        <div style={{marginTop:12}}>
+          {post.comments.map(c=>(
+            <div key={c.id} style={{display:'flex',gap:8,marginBottom:8}}>
+              <Avatar name={c.authorName} photo={c.authorPhoto} size={26} fontSize={10}/>
+              <div style={{background:'var(--paper2)',borderRadius:10,padding:'6px 10px',fontSize:12.5}}>
+                <strong style={{fontSize:12}}>{c.authorName}</strong><br/>{c.text}
+              </div>
+            </div>
+          ))}
+          <div style={{display:'flex',gap:8,marginTop:6}}>
+            <input placeholder="Write a comment..." value={commentText} onChange={e=>setCommentText(e.target.value)}
+              onKeyDown={e=>{ if(e.key==='Enter'){ onComment(post.id,commentText); setCommentText(''); } }}
+              style={{flex:1,border:'1px solid var(--line)',borderRadius:8,padding:'6px 10px',fontSize:12.5}}/>
+            <button className="btn btn-ghost btn-sm" onClick={()=>{onComment(post.id,commentText); setCommentText('');}}>Send</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ================= MARKETPLACE ================= */
+const CATEGORIES=['Furniture','Clothing','Electronics','Books & School','Baby & Kids','Food','Appliances','Other'];
+
+function Marketplace({account,barangays,listings,setListings,push,
+  search,setSearch,category,setCategory,sortBy,setSortBy,selectedId,setSelectedId}){
+  const [showForm,setShowForm]=useState(false);
+  const [myLoc,setMyLoc]=useState(null);
+  const [locStatus,setLocStatus]=useState('idle');
+
+  function requestLocation(){
+    if(!navigator.geolocation){ setLocStatus('unsupported'); return; }
+    setLocStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ setMyLoc({lat:pos.coords.latitude,lng:pos.coords.longitude}); setLocStatus('ok'); },
+      ()=>{ setLocStatus('denied'); },
+      {timeout:6000}
+    );
+  }
+
+  const barangay=barangays.find(b=>b.id===account.barangayId);
+  const originLoc = myLoc || (barangay ? {lat:barangay.lat,lng:barangay.lng} : null);
+
+  let visible = listings.filter(l=>{
+    if(category!=='all' && l.category!==category) return false;
+    if(search && !(l.title+l.description).toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  }).map(l=>{
+    const lb=barangays.find(b=>b.id===l.barangayId);
+    const dist = originLoc && lb ? haversine(originLoc.lat,originLoc.lng,lb.lat,lb.lng) : null;
+    return {...l, distance:dist};
+  });
+
+  if(sortBy==='newest') visible.sort((a,b)=>b.ts-a.ts);
+  else if(sortBy==='distance') visible.sort((a,b)=>(a.distance??999)-(b.distance??999));
+  else if(sortBy==='az') visible.sort((a,b)=>a.title.localeCompare(b.title));
+
+  if(selectedId){
+    const raw=listings.find(l=>l.id===selectedId);
+    if(raw){
+      const lb=barangays.find(b=>b.id===raw.barangayId);
+      const dist = originLoc && lb ? haversine(originLoc.lat,originLoc.lng,lb.lat,lb.lng) : null;
+      return <ListingDetail listing={{...raw,distance:dist}} barangay={lb} account={account} setListings={setListings} push={push} onBack={()=>setSelectedId(null)}/>;
+    }
+    // listing no longer exists (e.g. removed) — fall back to the results list
+    setSelectedId(null);
+  }
+
+  return (
+    <div>
+      <div className="page-head" style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:10}}>
+        <div>
+          <div className="eyebrow">Free Listing</div>
+          <h1 className="page-title">Give & Take Marketplace</h1>
+          <p className="page-desc">Free items only — no buying, no selling. Just neighbors helping neighbors.</p>
+        </div>
+        <button className="btn btn-gold" onClick={()=>setShowForm(true)}><Icon name="plus" size={15}/> List an item</button>
+      </div>
+
+      <div className="search-bar">
+        <Icon name="search" size={16} color="var(--ink-soft)"/>
+        <input placeholder="Search free items..." value={search} onChange={e=>setSearch(e.target.value)}/>
+      </div>
+
+      <div className="sort-bar" style={{justifyContent:'space-between'}}>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <select value={category} onChange={e=>setCategory(e.target.value)}>
+            <option value="all">All categories</option>
+            {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+            <option value="newest">Newest first</option>
+            <option value="distance">Nearest first</option>
+            <option value="az">A – Z</option>
+          </select>
+        </div>
+        <button className="btn btn-ghost btn-sm" onClick={requestLocation}>
+          <Icon name="pin" size={13}/> {locStatus==='ok' ? 'Using your location' : locStatus==='loading' ? 'Locating...' : locStatus==='denied' ? 'Location denied — using barangay' : 'Sort by my location'}
+        </button>
+      </div>
+
+      {visible.length===0 ? (
+        <div className="empty"><Icon name="gift" size={40}/><div>No free items match yet. Be generous — list something!</div></div>
+      ) : (
+        <div className="grid grid-3">
+          {visible.map(l=>{
+            const lb=barangays.find(b=>b.id===l.barangayId);
+            return (
+              <div key={l.id} className="card listing-card" style={{cursor:'pointer'}} onClick={()=>setSelectedId(l.id)}>
+                <div className="listing-img">
+                  {l.photo ? <img src={l.photo}/> : <Icon name="gift" size={30} color="var(--teal)"/>}
+                  {l.claimed && <span className="claimed-badge">Claimed</span>}
+                </div>
+                <div className="listing-body">
+                  <div className="listing-title">{l.title}</div>
+                  <div className="listing-desc">{l.description}</div>
+                  <div className="listing-foot">
+                    <span className="mono">{l.category}</span>
+                    <span>{l.distance!=null ? `${l.distance.toFixed(1)} km` : (lb?lb.name:'')}</span>
+                  </div>
+                  {(l.ownerId===account.id && !l.claimed) && (
+                    <button className="btn btn-ghost btn-sm" style={{marginTop:6}} onClick={(e)=>{e.stopPropagation(); setListings(prev=>prev.map(x=>x.id===l.id?{...x,claimed:true}:x));}}>Mark as claimed</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {showForm && <ListingForm account={account} onClose={()=>setShowForm(false)} onSave={(item)=>{
+        setListings(prev=>[{...item,id:uid(),ownerId:account.id,ownerName:account.name,barangayId:account.barangayId,ts:Date.now(),claimed:false},...prev]);
+        setShowForm(false);
+        push('Your free item is now listed!');
+      }}/>}
+    </div>
+  );
+}
+
+function ListingDetail({listing,barangay,account,setListings,push,onBack}){
+  const isOwner = listing.ownerId===account.id;
+  return (
+    <div>
+      <button className="btn btn-ghost btn-sm" style={{marginBottom:16}} onClick={onBack}>
+        <Icon name="chevronRight" size={14} strokeWidth={2.5}/> Back to search results
+      </button>
+      <div className="card" style={{overflow:'hidden'}}>
+        <div style={{height:300,background:'linear-gradient(135deg,var(--teal-mist),var(--gold-mist))',display:'flex',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden'}}>
+          {listing.photo ? <img src={listing.photo} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <Icon name="gift" size={64} color="var(--teal)"/>}
+          {listing.claimed && <span className="claimed-badge" style={{fontSize:12,padding:'5px 12px'}}>Claimed</span>}
+        </div>
+        <div className="pad">
+          <h1 className="page-title" style={{fontSize:22,marginBottom:8}}>{listing.title}</h1>
+          <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:16}}>
+            <span className="tag" style={{background:'var(--teal-mist)',color:'var(--teal2)'}}>{listing.category}</span>
+            <span style={{fontSize:12.5,color:'var(--ink-soft)'}}>Listed {timeAgo(listing.ts)}</span>
+          </div>
+          <p style={{fontSize:14.5,lineHeight:1.6,color:'var(--ink)',marginBottom:20,whiteSpace:'pre-wrap'}}>
+            {listing.description || 'No additional details provided.'}
+          </p>
+          <div className="grid grid-2">
+            <div>
+              <div className="section-label">Pickup location</div>
+              <div style={{display:'flex',alignItems:'center',gap:8,fontSize:14,fontWeight:700}}>
+                <Icon name="pin" size={16} color="var(--teal)"/> {barangay?`${barangay.name}, ${barangay.city}`:'—'}
+              </div>
+              {listing.distance!=null && <div style={{fontSize:12.5,color:'var(--ink-soft)',marginTop:4}}>{listing.distance.toFixed(1)} km away</div>}
+            </div>
+            <div>
+              <div className="section-label">Listed by</div>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <Avatar name={listing.ownerName} size={30}/>
+                <span style={{fontSize:14,fontWeight:700}}>{listing.ownerName}{isOwner && ' (You)'}</span>
+              </div>
+            </div>
+          </div>
+          {isOwner && !listing.claimed && (
+            <button className="btn btn-gold" style={{marginTop:22}} onClick={()=>{ setListings(prev=>prev.map(x=>x.id===listing.id?{...x,claimed:true}:x)); push('Marked as claimed.'); }}>
+              <Icon name="check" size={14}/> Mark as claimed
+            </button>
+          )}
+          {!isOwner && !listing.claimed && (
+            <div className="field-hint" style={{marginTop:22,fontSize:12.5}}>
+              Interested? Reach out through the Community Wall or barangay hall to arrange pickup with {listing.ownerName}.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ListingForm({account,onClose,onSave}){
+  const [title,setTitle]=useState('');
+  const [description,setDescription]=useState('');
+  const [category,setCategory]=useState(CATEGORIES[0]);
+  const [photo,setPhoto]=useState(null);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-head"><h3 style={{margin:0,fontSize:17}}>List a free item</h3>
+          <button className="icon-btn" onClick={onClose}><Icon name="x"/></button>
+        </div>
+        <div className="field"><label>Item name</label><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Wooden dining chairs (set of 4)"/></div>
+        <div className="field"><label>Description</label><textarea rows={3} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Condition, pickup instructions, etc."/></div>
+        <div className="field"><label>Category</label>
+          <select value={category} onChange={e=>setCategory(e.target.value)}>{CATEGORIES.map(c=><option key={c}>{c}</option>)}</select>
+        </div>
+        <div className="field"><label>Photo</label><PhotoPicker photo={photo} onChange={setPhoto} label="Add a photo of the item"/></div>
+        <div className="field-hint" style={{margin:'10px 0 14px'}}>Location is set automatically to your registered barangay.</div>
+        <button className="btn btn-gold btn-block" disabled={!title.trim()} onClick={()=>onSave({title:title.trim(),description:description.trim(),category,photo})}>Post listing</button>
+      </div>
+    </div>
+  );
+}
+
+/* ================= ADMIN ================= */
+function AdminPanel({account,barangays,setBarangays,posts,setPosts,push}){
+  const [tab,setTab]=useState(account.role==='superuser' ? 'barangays' : 'incidents');
+  const isSuper=account.role==='superuser';
+
+  return (
+    <div>
+      <div className="page-head">
+        <div className="eyebrow">Admin Panel</div>
+        <h1 className="page-title">{isSuper ? 'Manage the System' : 'Barangay Administration'}</h1>
+        <p className="page-desc">{isSuper ? 'Add and update the master barangay directory.' : 'Handle incident reports and post official updates.'}</p>
+      </div>
+      <div className="sort-bar">
+        {isSuper && <button className={"chip-toggle"+(tab==='barangays'?' active':'')} onClick={()=>setTab('barangays')}>Barangay Directory</button>}
+        <button className={"chip-toggle"+(tab==='incidents'?' active':'')} onClick={()=>setTab('incidents')}>Incident Reports</button>
+      </div>
+      {tab==='barangays' && isSuper && <BarangayManager barangays={barangays} setBarangays={setBarangays} push={push}/>}
+      {tab==='incidents' && <IncidentManager account={account} barangays={barangays} posts={posts} setPosts={setPosts} push={push}/>}
+    </div>
+  );
+}
+
+function BarangayManager({barangays,setBarangays,push}){
+  const [editing,setEditing]=useState(null);
+  const [q,setQ]=useState('');
+  const filtered = barangays.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
+  return (
+    <div className="card pad">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,gap:10,flexWrap:'wrap'}}>
+        <div className="section-label" style={{margin:0}}>{barangays.length} barangays registered (Lucena City, Quezon)</div>
+        <button className="btn btn-primary btn-sm" onClick={()=>setEditing('new')}><Icon name="plus" size={13}/> Add barangay</button>
+      </div>
+      <input placeholder="Search barangay..." value={q} onChange={e=>setQ(e.target.value)} style={{width:'100%',border:'1px solid var(--line)',borderRadius:9,padding:'8px 12px',fontSize:13,marginBottom:8}}/>
+      <div style={{maxHeight:420,overflowY:'auto'}}>
+        {filtered.map(b=>(
+          <div key={b.id} className="list-row">
+            <div style={{width:34,height:34,borderRadius:8,background:'var(--teal-mist)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+              <Icon name="building" size={16} color="var(--teal)"/>
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontWeight:600,fontSize:13.5}}>{b.name}</div>
+              <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{b.city}, {b.province} · {b.lat.toFixed(4)}, {b.lng.toFixed(4)}</div>
+            </div>
+            <button className="icon-btn" onClick={()=>setEditing(b)}><Icon name="edit" size={16}/></button>
+            <button className="icon-btn" onClick={()=>{ setBarangays(prev=>prev.filter(x=>x.id!==b.id)); push(`${b.name} removed from directory.`); }}><Icon name="trash" size={16}/></button>
+          </div>
+        ))}
+      </div>
+      {editing && <BarangayForm initial={editing==='new'?null:editing} onClose={()=>setEditing(null)} onSave={(data)=>{
+        if(editing==='new'){ setBarangays(prev=>[...prev,{...data,id:uid()}]); push(`${data.name} added.`); }
+        else { setBarangays(prev=>prev.map(x=>x.id===editing.id?{...x,...data}:x)); push(`${data.name} updated.`); }
+        setEditing(null);
+      }}/>}
+    </div>
+  );
+}
+
+function BarangayForm({initial,onClose,onSave}){
+  const [name,setName]=useState(initial?.name||'');
+  const [city,setCity]=useState(initial?.city||'Lucena City');
+  const [province,setProvince]=useState(initial?.province||'Quezon');
+  const [lat,setLat]=useState(initial?.lat??'');
+  const [lng,setLng]=useState(initial?.lng??'');
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-head"><h3 style={{margin:0,fontSize:17}}>{initial?'Edit barangay':'Add barangay'}</h3>
+          <button className="icon-btn" onClick={onClose}><Icon name="x"/></button>
+        </div>
+        <div className="field"><label>Barangay name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Barangay Poblacion"/></div>
+        <div className="field-row">
+          <div className="field"><label>City / Municipality</label><input value={city} onChange={e=>setCity(e.target.value)} placeholder="Lucena City"/></div>
+          <div className="field"><label>Province</label><input value={province} onChange={e=>setProvince(e.target.value)} placeholder="Quezon"/></div>
+        </div>
+        <div className="field-row">
+          <div className="field"><label>Latitude</label><input value={lat} onChange={e=>setLat(e.target.value)} placeholder="13.9373"/></div>
+          <div className="field"><label>Longitude</label><input value={lng} onChange={e=>setLng(e.target.value)} placeholder="121.6210"/></div>
+        </div>
+        <div className="field-hint" style={{marginBottom:14}}>Coordinates power distance-based sorting in Free Listings.</div>
+        <button className="btn btn-primary btn-block" disabled={!name.trim()||!city.trim()} onClick={()=>onSave({name:name.trim(),city:city.trim(),province:province.trim(),lat:parseFloat(lat)||0,lng:parseFloat(lng)||0})}>Save barangay</button>
+      </div>
+    </div>
+  );
+}
+
+function IncidentManager({account,barangays,posts,setPosts,push}){
+  const scoped = account.role==='superuser' ? posts : posts.filter(p=>p.barangayId===account.barangayId);
+  const incidents = scoped.filter(p=>p.type==='incident').sort((a,b)=> (a.resolved-b.resolved) || b.ts-a.ts);
+  function resolve(id){ setPosts(prev=>prev.map(p=>p.id===id?{...p,resolved:true}:p)); push('Incident marked resolved.'); }
+  return (
+    <div className="card pad">
+      <div className="section-label">{incidents.filter(i=>!i.resolved).length} open · {incidents.length} total incident reports</div>
+      {incidents.length===0 ? <p style={{fontSize:13,color:'var(--ink-soft)'}}>No incident reports yet.</p> :
+        incidents.map(p=>{
+          const b=barangays.find(x=>x.id===p.barangayId);
+          return (
+            <div key={p.id} className="list-row">
+              {p.photo && <img src={p.photo} style={{width:40,height:40,borderRadius:8,objectFit:'cover',flexShrink:0}}/>}
+              <span className={"tag sev-"+p.severity}>{p.severity}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:600}}>{p.content}</div>
+                <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{p.authorName} · {b?b.name:''} · {timeAgo(p.ts)}{p.resolved?' · resolved':''}</div>
+              </div>
+              {!p.resolved && <button className="btn btn-ghost btn-sm" onClick={()=>resolve(p.id)}>Resolve</button>}
+            </div>
+          );
+        })}
+    </div>
+  );
+}
+
+/* ================= PROFILE ================= */
+function Profile({account,setAccount,barangays,onLogout,push}){
+  const [form,setForm]=useState(account);
+  const barangay=barangays.find(b=>b.id===account.barangayId);
+  function save(){ setAccount(form); push('Profile updated.'); }
+  function updateNotif(key){ setForm(f=>({...f,notifPrefs:{...f.notifPrefs,[key]:!f.notifPrefs[key]}})); }
+  return (
+    <div>
+      <div className="page-head">
+        <div className="eyebrow">Account</div>
+        <h1 className="page-title">Profile & Settings</h1>
+        <p className="page-desc">Update your details, photo, and notification preferences.</p>
+      </div>
+      <div className="grid grid-2">
+        <div className="card pad">
+          <div className="section-label">Profile photo</div>
+          <div style={{marginBottom:16}}>
+            <PhotoPicker photo={form.avatarPhoto} onChange={p=>setForm({...form,avatarPhoto:p})} label="Upload profile photo" shape="avatar"/>
+          </div>
+          <div className="section-label">Personal information</div>
+          <div className="field"><label>Full name</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></div>
+          <div className="field"><label>Email address</label><input value={form.email} disabled/><div className="field-hint">Email is unique to your account and can't be changed here.</div></div>
+          <div className="field"><label>Mobile number</label><input value={form.mobile} disabled/><div className="field-hint">Contact a barangay officer to update your verified mobile number.</div></div>
+          <div className="field"><label>House no. / Street</label><input value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/></div>
+          {form.role!=='superuser' && (
+            <div className="field"><label>Barangay</label>
+              <select value={form.barangayId||''} onChange={e=>setForm({...form,barangayId:e.target.value})}>
+                {barangays.map(b=><option key={b.id} value={b.id}>{b.name}, {b.city}</option>)}
+              </select>
+            </div>
+          )}
+          <div className="field"><label>Role</label>
+            <div style={{marginBottom:8}}><span className="role-pill">{form.role}</span></div>
+            <div className="field-hint" style={{marginBottom:8}}>Demo prototype — switch roles anytime for testing.</div>
+            <select value={form.role} onChange={e=>setForm({...form,role:e.target.value, barangayId: e.target.value==='superuser'?null:(form.barangayId||barangays[0]?.id)})}>
+              <option value="resident">Resident</option><option value="officer">Barangay Officer</option>
+              <option value="captain">Barangay Captain</option><option value="superuser">Superuser</option>
+            </select>
+          </div>
+          <button className="btn btn-primary" onClick={save}>Save changes</button>
+        </div>
+
+        <div>
+          <div className="card pad" style={{marginBottom:16}}>
+            <div className="section-label">Notification preferences</div>
+            {[['incidents','Incident reports'],['announcements','Barangay announcements'],['events','Community events']].map(([k,label])=>(
+              <label key={k} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--line)',fontSize:13.5}}>
+                {label}
+                <input type="checkbox" checked={!!form.notifPrefs[k]} onChange={()=>updateNotif(k)}/>
+              </label>
+            ))}
+          </div>
+          <div className="card pad">
+            <div className="section-label">Account</div>
+            <div style={{fontSize:13, color:'var(--ink-soft)', marginBottom:12}}>
+              Registered {new Date(account.createdAt).toLocaleDateString()} via {account.provider || 'email'}{barangay?` · ${barangay.name}, ${barangay.city}`:''}
+            </div>
+            <button className="btn btn-ghost btn-block" onClick={onLogout}><Icon name="logout" size={14}/> Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= APP ROOT ================= */
+function App(){
+  const [loading,setLoading]=useState(true);
+  const [account,setAccountState]=useState(null);
+  const [barangays,setBarangaysState]=useState(SEED_BARANGAYS);
+  const [posts,setPostsState]=useState([]);
+  const [listings,setListingsState]=useState([]);
+  const [accounts,setAccountsState]=useState([]);
+  const [view,setView]=useState('dashboard');
+  const {toasts,push}=useToasts();
+
+  // Marketplace search/filter/sort state lives here (not inside Marketplace) so it's
+  // cached across navigating into a listing's detail page, other tabs, and back.
+  const [marketSearch,setMarketSearch]=useState('');
+  const [marketCategory,setMarketCategory]=useState('all');
+  const [marketSort,setMarketSort]=useState('newest');
+  const [marketSelectedId,setMarketSelectedId]=useState(null);
+
+  useEffect(()=>{
+    (async()=>{
+      const bgy=await loadShared(KEY_BARANGAYS,null);
+      const pst=await loadShared(KEY_POSTS,[]);
+      const lst=await loadShared(KEY_LISTINGS,[]);
+      const accs=await loadShared(KEY_ACCOUNTS,[]);
+      const session=await loadPersonal(KEY_SESSION,null);
+      if(bgy && bgy.length) setBarangaysState(bgy); else await saveShared(KEY_BARANGAYS,SEED_BARANGAYS);
+      setPostsState(pst);
+      setListingsState(lst);
+      setAccountsState(accs);
+      if(session && session.accountId){
+        const found=accs.find(a=>a.id===session.accountId);
+        if(found) setAccountState(found);
+      }
+      setLoading(false);
+    })();
+  },[]);
+
+  function setBarangays(updater){ setBarangaysState(prev=>{ const next= typeof updater==='function'?updater(prev):updater; saveShared(KEY_BARANGAYS,next); return next; }); }
+  function setPosts(updater){ setPostsState(prev=>{ const next= typeof updater==='function'?updater(prev):updater; saveShared(KEY_POSTS,next); return next; }); }
+  function setListings(updater){ setListingsState(prev=>{ const next= typeof updater==='function'?updater(prev):updater; saveShared(KEY_LISTINGS,next); return next; }); }
+  function setAccounts(updater){ setAccountsState(prev=>{ const next= typeof updater==='function'?updater(prev):updater; saveShared(KEY_ACCOUNTS,next); return next; }); }
+
+  function onAuthed(account, kind){
+    if(kind==='signup'){
+      setAccounts(prev=>[...prev, account]);
+    }
+    setAccountState(account);
+    savePersonal(KEY_SESSION,{accountId:account.id});
+  }
+
+  function setAccount(updatedAccount){
+    setAccountState(updatedAccount);
+    setAccounts(prev=>prev.map(a=>a.id===updatedAccount.id?updatedAccount:a));
+  }
+
+  function onLogout(){ setAccountState(null); savePersonal(KEY_SESSION,null); setView('dashboard'); }
+
+  if(loading){
+    return <div className="brgy-root" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh'}}>
+      <div style={{textAlign:'center',color:'var(--ink-soft)'}}>
+        <div className="brand-mark" style={{margin:'0 auto 10px'}}>B</div>
+        Loading Barangay Konek…
+      </div>
+    </div>;
+  }
+
+  if(!account){
+    return <div className="brgy-root"><AuthGate barangays={barangays} accounts={accounts} onAuthed={onAuthed} push={push}/><Toasts toasts={toasts}/></div>;
+  }
+
+  const barangayName = barangays.find(b=>b.id===account.barangayId)?.name;
+  const pendingIncidents = posts.filter(p=>p.type==='incident' && !p.resolved && (account.role==='superuser' || p.barangayId===account.barangayId)).length;
+
+  return (
+    <div className="brgy-root">
+      <div className="app-shell">
+        <Sidebar view={view} setView={setView} account={account} barangayName={barangayName} onLogout={onLogout} pendingIncidents={account.role!=='resident'?pendingIncidents:0}/>
+        <div className="main-col">
+          <TopBar account={account}/>
+          <div className="content">
+            {view==='dashboard' && <Dashboard account={account} barangays={barangays} posts={posts} listings={listings} setView={setView}/>}
+            {view==='wall' && <WallFeed account={account} barangays={barangays} posts={posts} setPosts={setPosts} push={push}/>}
+            {view==='marketplace' && <Marketplace account={account} barangays={barangays} listings={listings} setListings={setListings} push={push}
+              search={marketSearch} setSearch={setMarketSearch}
+              category={marketCategory} setCategory={setMarketCategory}
+              sortBy={marketSort} setSortBy={setMarketSort}
+              selectedId={marketSelectedId} setSelectedId={setMarketSelectedId}/>}
+            {view==='admin' && (account.role!=='resident') && <AdminPanel account={account} barangays={barangays} setBarangays={setBarangays} posts={posts} setPosts={setPosts} push={push}/>}
+            {view==='profile' && <Profile account={account} setAccount={setAccount} barangays={barangays} onLogout={onLogout} push={push}/>}
+          </div>
+          <BottomNav view={view} setView={setView} role={account.role} pendingIncidents={account.role!=='resident'?pendingIncidents:0}/>
+        </div>
+      </div>
+      <Toasts toasts={toasts}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('brgy-app-root')).render(<App/>);
+</script>

@@ -1,0 +1,71 @@
+<main class="public-home">
+  <header class="public-header">
+    <a class="brand" routerLink="/" aria-label="Barangay Konek home">
+      <span class="brand-icon"><mat-icon>home_work</mat-icon></span>
+      <span><strong>Barangay Konek</strong><small>Quezon Province</small></span>
+    </a>
+    <nav aria-label="Public sections">
+      <a href="#community">Community</a>
+      <a href="#marketplace">Marketplace</a>
+    </nav>
+    <a mat-flat-button class="sign-in" routerLink="/auth">Sign in</a>
+  </header>
+
+  @if (auth.authError()) {
+    <p role="alert">{{ auth.authError() }}</p>
+  }
+
+  <section class="welcome">
+    <p class="eyebrow">Your province, connected</p>
+    <h1>Welcome to your community.</h1>
+    <p>Explore recent community posts and marketplace listings across Quezon Province.</p>
+    <a mat-flat-button href="#community">Explore Community <mat-icon>arrow_downward</mat-icon></a>
+  </section>
+
+  <section id="community" class="public-section">
+    <div class="section-heading">
+      <div><p class="eyebrow">Stay connected</p><h2>Community</h2></div>
+      <a routerLink="/community">See all <mat-icon>arrow_forward</mat-icon></a>
+    </div>
+    <div class="preview-grid">
+      @for (post of posts(); track post.id) {
+        <a class="preview-card preview-link" [routerLink]="['/community']" [queryParams]="{ post: post.id }">
+          <img class="post-photo" [src]="post.photos?.[0] || post.photo || '/images/community-placeholder.svg'" [alt]="post.title">
+          <div class="card-meta"><span class="post-type">{{ post.type }}</span><time>{{ post.timestamp }}</time></div>
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body }}</p>
+          <span class="author">{{ post.author }}</span>
+          <span class="preview-open">Open post <mat-icon>arrow_forward</mat-icon></span>
+        </a>
+      } @empty {
+        <div class="empty-state">No community posts yet.</div>
+      }
+    </div>
+  </section>
+
+  <section id="marketplace" class="public-section marketplace-section">
+    <div class="section-heading">
+      <div><p class="eyebrow">Around the neighborhood</p><h2>Marketplace</h2></div>
+      <a routerLink="/marketplace">See all <mat-icon>arrow_forward</mat-icon></a>
+    </div>
+    <div class="preview-grid">
+      @for (listing of listings(); track listing.id) {
+        <a class="preview-card preview-link listing-card" [routerLink]="['/marketplace', listing.id]">
+          <img class="listing-photo" [src]="listing.photo || '/images/marketplace-placeholder.svg'" [alt]="listing.title">
+          <div class="card-meta"><span class="post-type">{{ listing.free ? 'Free' : listing.category }}</span><span>{{ listing.category }}</span></div>
+          <h3>{{ listing.title }}</h3>
+          <p>{{ listing.description }}</p>
+          <span class="author">{{ listing.owner }} · {{ auth.getBarangay(listing.barangayId)?.name || 'Quezon Province' }}</span>
+          <span class="preview-open">View listing <mat-icon>arrow_forward</mat-icon></span>
+        </a>
+      } @empty {
+        <div class="empty-state">No marketplace listings yet.</div>
+      }
+    </div>
+  </section>
+
+  <footer class="public-footer">
+    <span>Barangay Konek · Quezon Province</span>
+    <a routerLink="/auth">Sign in to participate</a>
+  </footer>
+</main>

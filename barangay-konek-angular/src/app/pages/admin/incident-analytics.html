@@ -1,0 +1,112 @@
+<section class="incident-analytics" aria-labelledby="incident-analytics-title">
+  <header class="analytics-heading">
+    <div>
+      <p class="eyebrow">Incident overview</p>
+      <h2 id="incident-analytics-title">Reported incidents</h2>
+      <p>Track cases by status across the selected period.</p>
+    </div>
+    <div class="period-control" role="group" aria-label="Incident reporting period">
+      <button type="button" [class.active]="period() === 'month'" [attr.aria-pressed]="period() === 'month'" (click)="setPeriod('month')">Month</button>
+      <button type="button" [class.active]="period() === 'year'" [attr.aria-pressed]="period() === 'year'" (click)="setPeriod('year')">Year</button>
+      <button type="button" [class.active]="period() === 'all'" [attr.aria-pressed]="period() === 'all'" (click)="setPeriod('all')">All time</button>
+    </div>
+  </header>
+
+  <div class="graph-grid" [class.dashboard-layout]="showSeverity">
+    @if (showSeverity) {
+      <section class="graph-card severity-card" aria-labelledby="incident-severity-title">
+        <div class="graph-card-heading">
+          <div><h3 id="incident-severity-title">Incidents by severity</h3><span>{{ periodLabel }}</span></div>
+          <span class="total-count">{{ totalSeverityIncidents }} classified</span>
+        </div>
+        <div class="severity-chart" role="group" aria-label="Incident counts by severity">
+          @for (metric of severityMetrics; track metric.key) {
+            <button class="severity-row" type="button" [class.selected]="selectedSeverity() === metric.key" [attr.aria-pressed]="selectedSeverity() === metric.key" [attr.title]="metric.label + ': ' + metric.count + ' incidents'" [attr.aria-label]="metric.label + ': ' + metric.count + ' incidents'" (click)="selectSeverity(metric.key)">
+              <span class="severity-label"><i [style.background]="metric.color"></i>{{ metric.label }}</span>
+              <span class="severity-track"><span class="severity-fill" [style.width.%]="severityBarWidth(metric.count)" [style.background]="metric.color"></span></span>
+              <strong>{{ metric.count }}</strong>
+            </button>
+          }
+        </div>
+        @if (selectedSeverity(); as severity) {
+          <div class="severity-recent">
+            <header>
+              <div>
+                <h4>Recent {{ severityLabel(severity) }} incidents</h4>
+                <span>{{ recentSeverityIncidents.length ? 'Incident ' + (recentIncidentIndex() + 1) + ' of ' + recentSeverityIncidents.length : 'No incidents · next severity in 5 seconds' }}</span>
+              </div>
+              <button type="button" class="rotation-control" (click)="toggleRotation()" [attr.aria-label]="rotationPaused() ? 'Resume incident rotation' : 'Pause incident rotation'" [attr.title]="rotationPaused() ? 'Resume rotation' : 'Pause rotation'">
+                <mat-icon>{{ rotationPaused() ? 'play_arrow' : 'pause' }}</mat-icon>
+              </button>
+            </header>
+            @if (visibleRecentIncident; as incident) {
+              <a class="recent-incident" [routerLink]="['/community']" [queryParams]="{ post: incident.id, type: 'incident', severity: incident.severity }">
+                <span class="recent-incident-copy"><strong>{{ incident.title }}</strong><small>{{ incident.purok || 'Barangay' }} · {{ incident.timestamp }}</small></span>
+                <mat-icon>chevron_right</mat-icon>
+              </a>
+            } @else {
+              <p class="recent-empty">No {{ severityLabel(severity).toLowerCase() }} incidents in this period.</p>
+            }
+            <a class="severity-view-all" [routerLink]="['/community']" [queryParams]="{ type: 'incident', severity: severity }">View all <mat-icon>arrow_forward</mat-icon></a>
+          </div>
+        }
+      </section>
+    }
+
+    <section class="graph-card status-bar-card" aria-labelledby="incident-bars-title">
+      <div class="graph-card-heading">
+        <div><h3 id="incident-bars-title">Incident count</h3><span>{{ periodLabel }}</span></div>
+        <span class="total-count">{{ totalIncidents }} total</span>
+      </div>
+      @if (totalIncidents) {
+        <div class="bar-chart" role="group" aria-label="Incident counts by status">
+          @for (metric of metrics; track metric.key) {
+            <button class="bar-column" type="button" [class.hovered]="hoveredStatus() === metric.key" [attr.title]="metric.label + ': ' + metric.count + ' incidents'" (mouseenter)="hover(metric.key)" (mouseleave)="clearHover(metric.key)" (focus)="hover(metric.key)" (blur)="clearHover(metric.key)">
+              <span class="bar-count">{{ metric.count }}</span>
+              <span class="bar-track"><span class="bar-fill" [style.height.%]="barHeight(metric.count)" [style.background]="metric.color"></span></span>
+              <span class="bar-label">{{ metric.label }}</span>
+              <span class="bar-tooltip">{{ metric.count }} {{ metric.count === 1 ? 'incident' : 'incidents' }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="chart-empty"><mat-icon>bar_chart</mat-icon><strong>No Data</strong><span>No incidents reported for {{ periodLabel.toLowerCase() }}.</span></div>
+      }
+    </section>
+
+    <section class="graph-card status-donut-card" aria-labelledby="incident-donut-title">
+      <div class="graph-card-heading">
+        <div><h3 id="incident-donut-title">Status distribution</h3><span>{{ periodLabel }}</span></div>
+        <span class="total-count">{{ totalIncidents }} total</span>
+      </div>
+      @if (totalIncidents) {
+        <div class="donut-layout">
+          <div class="donut-visual">
+            <svg viewBox="0 0 160 160" role="img" aria-label="Incident status distribution">
+              <circle class="donut-track" cx="80" cy="80" r="56"></circle>
+              @for (segment of donutSegments; track segment.key) {
+                <circle class="donut-segment" [class.highlighted]="hoveredStatus() === segment.key" cx="80" cy="80" r="56" fill="none" [attr.stroke]="segment.color" [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset" transform="rotate(-90 80 80)" tabindex="0" [attr.aria-label]="segment.label + ': ' + segment.count + ' incidents'" (mouseenter)="hover(segment.key)" (mouseleave)="clearHover(segment.key)" (focus)="hover(segment.key)" (blur)="clearHover(segment.key)">
+                  <title>{{ segment.label }}: {{ segment.count }} incidents</title>
+                </circle>
+              }
+            </svg>
+            <div class="donut-center" aria-live="polite">
+              <strong>{{ hoveredMetric?.count ?? totalIncidents }}</strong>
+              <span>{{ hoveredMetric?.label ?? 'Incidents' }}</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            @for (metric of metrics; track metric.key) {
+              <button type="button" class="legend-row" [class.highlighted]="hoveredStatus() === metric.key" (mouseenter)="hover(metric.key)" (mouseleave)="clearHover(metric.key)" (focus)="hover(metric.key)" (blur)="clearHover(metric.key)">
+                <i [style.background]="metric.color"></i><span>{{ metric.label }}</span><strong>{{ metric.count }}</strong>
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="chart-empty"><mat-icon>donut_small</mat-icon><strong>No Data</strong><span>No incidents reported for {{ periodLabel.toLowerCase() }}.</span></div>
+      }
+    </section>
+
+  </div>
+</section>

@@ -1,0 +1,56 @@
+Plan:
+
+
+	1. Check the barangay-app.html and initiate the #sym:SEED_BARANGAYS data as initial only for Lucena City. The rest of the Quezon Province's City or Town barangays shall follow. This shall be a province centered social community. The rest of the Philippines provinces will be uploaded/imported later. For now, prepare the necessary logic to this.
+		a. Seed data/list of Barangays for Tayabas City as another city and barangay testing.
+
+	2. In the notification bell (header), push notifications on each new posts from the wall community. Push notifications includes:
+		a. when there is a free listing near the user's location
+		b. When there is a private message
+		c. Community strike or violation
+		
+	3. In the User Settings, add a toggle on/off to receive Marketplace listing in the area. Next to it, add a nice distance slider for the user to adjust the proximity of the listing alerts. Ex. 0-100 km
+
+		a. In the user profile settings, add a section for "Community Profile Status"
+		b. Display the received count of reported cases 0-100. Auto ban users under these range.
+			i. 0 - displays "Healthy" with zero violations
+			ii. 1-20 - Mild, this is recorded to the Barangay admin dashboard to a list of users violated 
+			iii. 21-40 - Hot, this is recorded to the Barangay admin dashboard to a list of users violated, temporarily suspend the user to post in the community wall and marketplace, comment for 5 days. Show suspended status.
+			iv. 41-60 - Very Hot, same as above. Suspension for 10 days
+			v. 61-80 - Severe, same as above. Suspension for 20 days
+			vi. 81-100 - Danger Zone, same as above. Suspension for 30 days. Barangay Admin has the ability to permanently ban the user.
+			vii. Banned users has a flag and cannot register with a new account using in either one of the following:
+				1) Mobile number
+				2) Email address
+				3) Facebook account
+				4) Gmail account, etc
+		
+	4. In each community wall post, 
+		a. Add a Flag/Report Post, Author of post, and User in the comments section. Create/see the above #3 logic for this. 
+		b. In the Community Wall, allow the user to post images of up to 4. Create thumbnails as default view, equally divided horizontally. When an image is clicked, the system shall display the full view but 80% image size. If there is only 1 photo/image uploaded, cropped the image to fit horizontally in the community wall post. On click, the single image shall be displayed  full view but 80% image size. 
+		c. Post card view, if any image is available add it in the right side as image thumb feature. Add image placeholder when there is no photo. 
+		d. Post details shall display all the uploaded photos. If there is none, do not display a placeholder.
+		e. Prevent any html code and hyperlinks in the comments and marketplace. 
+		f. 
+
+	5. The Admin settings shall have:
+			i. Dashboard graph with the user violations count grouped by severity
+			ii. List of users under the violation range
+			iii. Clickable user details showing the violations range and the option to permanently ban the user
+			iv. Add a section for banned words such as Profanity, sex, nudity, harassment, etc
+				1) Create a logic to seed initial data
+				2) auto detect and flag a user using with these words
+				3) 
+			v. Implement clickable Incident Queues
+				1) Add a title "All Barangay Incident Queues" as a default view.
+				2) On click incident, user is directed to the specific post. Admin/user can then mark it as Resolved. When resolving an incident, the user/admin is required to make a comment or upload a photo as evidence. 
+				3) Incident report marked as Resolved shall have tag and label in the community wall.
+				4) The system shall update the incident queues accordingly
+			vi. Directory section on the right panel. Seed data complete list of Purok/Zones for Lucena City and Tayabas for all their barangays.
+				1) This shall list all the Purok/Zones in each Barangay.
+				2) When an admin/user currently logged in is a resident of the barangay, the list of Purok/Zones is limited to that barangay.
+				3) On Purok/Zone click, the system shall update the Incident Queues section for that specific purok/zone only. Update the title queues as [Purok/Zone Name] Incident Queues
+				4) Add back chevron button at the top of the section so that the usercan go back to the previous list (Example: All Barangay Incident Queues)
+
+
+	

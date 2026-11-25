@@ -1,0 +1,90 @@
+<main class="auth-page">
+  <section class="auth-shell">
+    <div class="brand">
+      <div class="brand-logo"><mat-icon>home_work</mat-icon></div>
+      <div>
+        <strong>Barangay Konek</strong>
+        <small>Community Registration</small>
+      </div>
+    </div>
+
+    <section class="auth-card">
+      @if (mode() === 'choose') {
+        <h1>Join your barangay</h1>
+        <p class="intro">Verify your email address with the link or one-time code sent to your inbox.</p>
+        @if (auth.authError()) { <p class="error">{{ auth.authError() }}</p> }
+        <button class="provider" type="button" (click)="mode.set('details')"><span class="provider-icon email"><mat-icon>mail_outline</mat-icon></span>Register with email</button>
+        <p class="switch">Already registered? <button type="button" (click)="mode.set('passwordLogin'); error.set('')">Log in</button></p>
+      }
+
+      @if (mode() === 'details') {
+        <h1>Enter your details</h1>
+        <p class="intro">We’ll email you a sign-in link or a one-time code, depending on your email settings.</p>
+        <mat-form-field appearance="outline"><mat-label>Full name</mat-label><input matInput [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="Juan Dela Cruz"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Email address</mat-label><input matInput type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" placeholder="juan@email.com"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Mobile number</mat-label><input matInput [ngModel]="mobile()" (ngModelChange)="mobile.set($event)" placeholder="09XX XXX XXXX"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Barangay</mat-label><mat-select [value]="barangayId()" (selectionChange)="barangayId.set($event.value)">@for (barangay of barangays; track barangay.id) { <mat-option [value]="barangay.id">{{ barangay.name }}, {{ barangay.city }}</mat-option> }</mat-select></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>House number or street (optional)</mat-label><input matInput [ngModel]="address()" (ngModelChange)="address.set($event)"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <div class="actions"><button mat-stroked-button type="button" (click)="backToChoose()">Back</button><button mat-flat-button type="button" [disabled]="busy() || isCoolingDown(email())" (click)="submitDetails()">{{ codeButtonLabel(email()) }}</button></div>
+      }
+
+      @if (mode() === 'otp') {
+        <h1>Confirm it's you</h1>
+        <p class="intro">Check <strong>{{ pendingEmail() }}</strong> for a sign-in link or one-time code. Click the link if one was sent; enter a numeric code below.</p>
+        <mat-form-field appearance="outline" class="otp"><mat-label>Email verification code</mat-label><input matInput inputmode="numeric" autocomplete="one-time-code" [ngModel]="otp()" (ngModelChange)="otp.set($event.replace(/[^0-9]/g, ''))" placeholder="Enter code"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy() || otp().length === 0" (click)="verifySignupOtp()">{{ busy() ? 'Verifying…' : 'Verify email and continue' }}</button>
+      }
+
+      @if (mode() === 'login') {
+        <h1>Log in with email</h1>
+        <p class="intro">Enter your email and we’ll send a sign-in link or one-time code if an account is registered.</p>
+        <mat-form-field appearance="outline"><mat-label>Email address</mat-label><input matInput type="email" autocomplete="email" [ngModel]="loginId()" (ngModelChange)="loginId.set($event)"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy() || isCoolingDown(loginId())" (click)="submitLogin()">{{ codeButtonLabel(loginId()) }}</button>
+        <p class="switch">Prefer a password? <button type="button" (click)="mode.set('passwordLogin'); error.set('')">Use password</button></p>
+        <p class="switch">New here? <button type="button" (click)="mode.set('details'); error.set('')">Create an account</button></p>
+      }
+
+      @if (mode() === 'passwordLogin') {
+        <h1>Log in with password</h1>
+        <p class="intro">Sign in with your verified email address and password.</p>
+        <mat-form-field appearance="outline"><mat-label>Email address</mat-label><input matInput type="email" autocomplete="username" [ngModel]="loginId()" (ngModelChange)="loginId.set($event)"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Password</mat-label><input matInput type="password" autocomplete="current-password" [ngModel]="password()" (ngModelChange)="password.set($event)"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy()" (click)="submitPasswordLogin()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
+        <p class="switch"><button type="button" (click)="mode.set('forgotPassword'); resetLinkSent.set(false); error.set('')">Forgot or need to set your password?</button></p>
+        <p class="switch">Prefer an email link or code? <button type="button" (click)="mode.set('login'); error.set('')">Use email sign-in</button></p>
+      }
+
+      @if (mode() === 'forgotPassword') {
+        <h1>Set or reset password</h1>
+        <p class="intro">We’ll send a secure password setup link to your email address.</p>
+        <mat-form-field appearance="outline"><mat-label>Email address</mat-label><input matInput type="email" autocomplete="email" [ngModel]="loginId()" (ngModelChange)="loginId.set($event); resetLinkSent.set(false)"></mat-form-field>
+        @if (resetLinkSent()) { <p class="intro">If an account exists for this address, a password setup link has been sent.</p> }
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy() || isCoolingDown(loginId())" (click)="sendPasswordReset()">{{ busy() ? 'Sending link…' : 'Send password setup link' }}</button>
+        <p class="switch"><button type="button" (click)="mode.set('passwordLogin'); error.set('')">Back to password sign-in</button></p>
+      }
+
+      @if (mode() === 'updatePassword') {
+        <h1>Choose a password</h1>
+        <p class="intro">Use at least 8 characters. Your password is handled securely by Supabase.</p>
+        <mat-form-field appearance="outline"><mat-label>New password</mat-label><input matInput type="password" autocomplete="new-password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Confirm new password</mat-label><input matInput type="password" autocomplete="new-password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy()" (click)="saveNewPassword()">{{ busy() ? 'Saving…' : 'Save password' }}</button>
+      }
+
+      @if (mode() === 'loginOtp') {
+        <h1>Confirm your login</h1>
+        <p class="intro">Check <strong>{{ pendingEmail() }}</strong> for a sign-in link or one-time code. Click the link if one was sent; enter a numeric code below.</p>
+        <mat-form-field appearance="outline" class="otp"><mat-label>Email verification code</mat-label><input matInput inputmode="numeric" autocomplete="one-time-code" [ngModel]="otp()" (ngModelChange)="otp.set($event.replace(/[^0-9]/g, ''))" placeholder="Enter code"></mat-form-field>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <button mat-flat-button class="wide" type="button" [disabled]="busy() || otp().length === 0" (click)="verifyLoginOtp()">{{ busy() ? 'Verifying…' : 'Verify and log in' }}</button>
+        <p class="switch">Use another sign-in method? <button type="button" (click)="mode.set('passwordLogin'); error.set('')">Sign in with password</button></p>
+      }
+    </section>
+  </section>
+</main>

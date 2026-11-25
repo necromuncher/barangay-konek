@@ -1,0 +1,33 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">Superuser workspace</p>
+    <h1>System Logs</h1>
+    <p>Review community banner uploads and updates.</p>
+  </div>
+  <div class="log-total"><mat-icon>history</mat-icon><strong>{{ wall.systemLogs().length }}</strong><span>entries</span></div>
+</header>
+
+<mat-card class="logs-panel">
+  <div class="logs-toolbar">
+    <div><h2>Banner activity</h2><p>Each entry includes the user and time of the change.</p></div>
+    <label class="log-search"><mat-icon>search</mat-icon><input type="search" [value]="search()" (input)="setSearch($event)" placeholder="Search user or barangay"></label>
+  </div>
+
+  <div class="log-list">
+    @for (log of logs; track log.id) {
+      <article class="log-row">
+        <span class="log-icon"><mat-icon>image</mat-icon></span>
+        <div class="log-description">
+          <strong>{{ log.action }}</strong>
+          <span>{{ log.barangayName }} Community Wall</span>
+        </div>
+        <div class="log-meta">
+          <strong>{{ log.actorName }}</strong>
+          <small>{{ log.timestamp | date:'medium' }}</small>
+        </div>
+      </article>
+    } @empty {
+      <div class="logs-empty"><mat-icon>history</mat-icon><strong>No system logs</strong><span>Community banner changes will appear here.</span></div>
+    }
+  </div>
+</mat-card>

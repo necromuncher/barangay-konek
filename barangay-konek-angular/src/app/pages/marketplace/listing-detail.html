@@ -1,0 +1,30 @@
+<a class="back-link" mat-button routerLink="/marketplace"><mat-icon>arrow_back</mat-icon>Back to free listings</a>
+
+@if (listing; as item) {
+  <mat-card class="detail-card">
+    <div class="detail-photo">
+      @if (item.photo) { <img [src]="item.photo" [alt]="item.title"> }
+      @else { <div class="photo-placeholder"><mat-icon>redeem</mat-icon><span>Free for the community</span></div> }
+    </div>
+    <section class="detail-copy">
+      @if (item.demoSeed) { <p class="sample-label"><mat-icon>science</mat-icon>Fictional sample listing for local testing</p> }
+      <div class="item-flags"><span class="free-label">FREE</span><span>{{ item.category }}</span>@if (item.sold) { <span class="sold-label">SOLD</span> }</div>
+      <h1>{{ item.title }}</h1>
+      <p class="description">{{ item.description }}</p>
+      <div class="detail-meta">
+        <div><mat-icon>location_on</mat-icon><span><strong>Pickup area</strong><small>{{ location?.name || 'Barangay community' }}, {{ location?.city || 'Quezon' }}, {{ location?.province || 'Quezon' }}</small></span></div>
+        <div class="seller-row"><mat-icon>person_outline</mat-icon><span><strong>Shared by</strong><small>{{ item.owner }}</small></span>@if (auth.account()) { <button mat-stroked-button type="button" aria-label="Send private message to giver" [title]="isOwner ? 'You cannot message yourself' : 'Message the giver privately'" [disabled]="isOwner" (click)="messageOwner()"><mat-icon>mail_outline</mat-icon><span>Message giver</span></button> } @else { <a mat-stroked-button routerLink="/auth">Sign in to contact</a> }</div>
+        <div><mat-icon>schedule</mat-icon><span><strong>Posted</strong><small>{{ item.timestamp | date:'mediumDate' }}</small></span></div>
+      </div>
+      @if (isOwner && !item.sold) {
+        <button class="mark-sold-button" mat-flat-button type="button" (click)="markAsSold()"><mat-icon>check_circle</mat-icon>Mark as sold</button>
+      }
+      @if (item.sold) {
+        <div class="sold-notice"><mat-icon>check_circle</mat-icon><span>{{ isOwner ? 'You marked this item as sold.' : 'This item has been marked as sold.' }}</span></div>
+      }
+      <div class="pickup-note"><mat-icon>verified_user</mat-icon><p>Arrange a public pickup time with the giver. Do not share sensitive information in public comments.</p></div>
+    </section>
+  </mat-card>
+} @else {
+  <mat-card class="not-found"><mat-icon>inventory_2</mat-icon><h1>Listing not found</h1><p>This item may have been removed.</p><a mat-flat-button routerLink="/marketplace">Browse free listings</a></mat-card>
+}

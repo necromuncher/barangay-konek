@@ -1,0 +1,65 @@
+<header class="page-head">
+  <div><p class="eyebrow">Private inbox</p><h1>Messages</h1><p>Have a direct conversation with another community member.</p></div>
+  <button mat-flat-button (click)="openNewMessage()"><mat-icon>edit</mat-icon>New message</button>
+</header>
+
+<mat-card class="messenger">
+  <aside class="threads">
+    @if (showingContacts()) {
+      <h2>Choose a member</h2>
+      @for (contact of contacts(); track contact.id) {
+        <button class="thread-item" (click)="openConversation(contact)">
+          @if (contact.photoUrl) { <img class="avatar" [src]="contact.photoUrl" alt=""> }
+          @else { <span class="avatar">{{ contact.name.slice(0, 1).toUpperCase() }}</span> }
+          <span class="thread-copy"><strong>{{ contact.name }}</strong><small>{{ contact.role }} · {{ auth.getBarangay(contact.barangayId)?.name || 'All barangays' }}</small></span>
+        </button>
+      } @empty {
+        <p class="empty-note">No other registered members yet.</p>
+      }
+    } @else {
+      <h2>Conversations</h2>
+      @for (thread of threads(); track thread.threadId) {
+        @if (participantFor(thread.threadId); as participant) {
+          <button class="thread-item" [class.selected]="activeUserId() === participant.id" (click)="openConversation(participant)">
+            @if (participant.photoUrl) { <img class="avatar" [src]="participant.photoUrl" alt=""> }
+            @else { <span class="avatar">{{ participant.name.slice(0, 1).toUpperCase() }}</span> }
+            <span class="thread-copy"><strong>{{ participant.name }}</strong><small>{{ thread.lastMessage.text }}</small></span>
+            @if (thread.unreadCount) { <span class="unread">{{ thread.unreadCount }}</span> }
+          </button>
+        }
+      } @empty {
+        <p class="empty-note">No conversations yet. Start a message with a community member.</p>
+      }
+    }
+  </aside>
+
+  <section class="conversation">
+    @if (activeUser(); as participant) {
+      <header class="conversation-head">
+        @if (participant.photoUrl) { <img class="avatar" [src]="participant.photoUrl" alt=""> }
+        @else { <span class="avatar">{{ participant.name.slice(0, 1).toUpperCase() }}</span> }
+        <div><strong>{{ participant.name }}</strong><small>{{ auth.getBarangay(participant.barangayId)?.name || 'Barangay Konek member' }}</small></div>
+      </header>
+      <div class="message-list" aria-live="polite">
+        @for (message of activeMessages(); track message.id) {
+          <div class="message-row" [class.own]="message.senderId === auth.account()?.id">
+            <div class="bubble"><p>{{ message.text }}</p><time>{{ message.sentAt | date:'short' }}</time></div>
+          </div>
+        } @empty {
+          <div class="conversation-empty"><mat-icon>forum</mat-icon><p>Start your conversation with {{ participant.name }}.</p></div>
+        }
+      </div>
+      <form class="compose" (ngSubmit)="send()">
+        <mat-form-field appearance="outline">
+          <mat-label>Write a message</mat-label>
+          <input matInput maxlength="1000" [disabled]="!messaging.ready()" [ngModel]="draft()" (ngModelChange)="draft.set($event)" name="message" autocomplete="off">
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="!messaging.ready() || !draft().trim()"><mat-icon>send</mat-icon>Send</button>
+      </form>
+      @if (messaging.error()) { <p class="error" role="alert">{{ messaging.error() }}</p> }
+      <p class="privacy-note">Messages are encrypted at rest in this browser. This local demo is not end-to-end encrypted and does not sync to other devices.</p>
+    } @else {
+      <div class="conversation-empty"><mat-icon>mark_email_unread</mat-icon><h2>Select a conversation</h2><p>Choose an existing chat or start a new message.</p></div>
+    }
+  </section>
+</mat-card>

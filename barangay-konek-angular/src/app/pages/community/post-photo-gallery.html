@@ -1,0 +1,42 @@
+<div class="gallery-root" (click)="$event.stopPropagation()">
+  @if (mode === 'thumbnail') {
+    <button class="thumbnail" type="button" [attr.aria-label]="'View photo gallery for ' + title" (click)="lightboxOpen.set(true)">
+      <img [src]="photos[0]" [alt]="title + ' photo 1'">
+      @if (photos.length > 1) { <span class="thumbnail-count"><mat-icon>collections</mat-icon>{{ photos.length }}</span> }
+    </button>
+  } @else if (photos.length === 1) {
+    <button class="single-photo" type="button" [attr.aria-label]="'View photo for ' + title" (click)="lightboxOpen.set(true)">
+      <img [src]="photos[0]" [alt]="title + ' photo'">
+    </button>
+  } @else if (photos.length > 1) {
+    <section class="post-gallery" role="region" aria-roledescription="carousel" [attr.aria-label]="'Photo gallery for ' + title">
+      <button class="gallery-arrow" type="button" aria-label="Previous photo" (click)="previous()"><mat-icon>chevron_left</mat-icon></button>
+      <button class="gallery-image" type="button" (click)="lightboxOpen.set(true)">
+        <img [src]="photos[currentIndex()]" [alt]="title + ' photo ' + (currentIndex() + 1) + ' of ' + photos.length">
+      </button>
+      <button class="gallery-arrow" type="button" aria-label="Next photo" (click)="next()"><mat-icon>chevron_right</mat-icon></button>
+      <div class="gallery-footer">
+        <span>{{ currentIndex() + 1 }} / {{ photos.length }}</span>
+        <div class="gallery-dots" aria-label="Select photo">
+          @for (photo of photos; track $index) {
+            <button type="button" [class.active]="currentIndex() === $index" [attr.aria-label]="'Show photo ' + ($index + 1)" [attr.aria-pressed]="currentIndex() === $index" (click)="select($index)"></button>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  @if (lightboxOpen()) {
+    <div class="photo-lightbox" role="dialog" aria-modal="true" [attr.aria-label]="'Photo gallery for ' + title" (click)="lightboxOpen.set(false)">
+      <button mat-icon-button type="button" class="lightbox-close" aria-label="Close photo gallery" (click)="lightboxOpen.set(false)"><mat-icon>close</mat-icon></button>
+      @if (photos.length > 1) {
+        <button class="lightbox-nav previous" type="button" aria-label="Previous photo" (click)="previous(); $event.stopPropagation()"><mat-icon>chevron_left</mat-icon></button>
+      }
+      <img class="lightbox-image" [src]="photos[currentIndex()]" [alt]="title + ' photo ' + (currentIndex() + 1) + ' of ' + photos.length" (click)="$event.stopPropagation()">
+      @if (photos.length > 1) {
+        <span class="lightbox-count">{{ currentIndex() + 1 }} / {{ photos.length }}</span>
+        <button class="lightbox-nav next" type="button" aria-label="Next photo" (click)="next(); $event.stopPropagation()"><mat-icon>chevron_right</mat-icon></button>
+      }
+    </div>
+  }
+</div>

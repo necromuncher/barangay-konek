@@ -1,0 +1,41 @@
+<header class="page-head"><div><p class="eyebrow">Account</p><h1>Profile &amp; Settings</h1><p>Manage your information and notifications.</p></div></header>
+<div class="profile-grid">
+  <mat-card class="identity">
+    @if (photoUrl()) { <img class="large-avatar photo" [src]="photoUrl()" alt="Profile photo"> }
+    @else { <div class="large-avatar">{{ initials }}</div> }
+    <h2>{{ auth.account()?.name }}</h2>
+    <p>{{ auth.account()?.role }} · {{ auth.getBarangay(auth.account()?.barangayId ?? null)?.name || 'All barangays' }}</p>
+    <input #photoPicker class="photo-picker" type="file" accept="image/*" (change)="onPhotoSelected($event)">
+    <button mat-stroked-button (click)="photoPicker.click()"><mat-icon>photo_camera</mat-icon>Change photo</button>
+    @if (photoError()) { <p class="photo-error" role="alert">{{ photoError() }}</p> }
+  </mat-card>
+  <mat-card class="settings">
+    <h2>Personal information</h2>
+    <mat-form-field appearance="outline"><mat-label>Full name</mat-label><input matInput [ngModel]="name()" (ngModelChange)="name.set($event)"></mat-form-field>
+    <mat-form-field appearance="outline"><mat-label>Verified email address</mat-label><input matInput [value]="auth.account()?.email" disabled><mat-hint>Email is managed by secure sign-in.</mat-hint></mat-form-field>
+    <mat-form-field appearance="outline"><mat-label>Mobile number</mat-label><input matInput [value]="auth.account()?.mobile" disabled><mat-hint>Mobile number cannot be changed here.</mat-hint></mat-form-field>
+    <mat-form-field appearance="outline"><mat-label>Barangay</mat-label><mat-select [value]="barangayId()" (selectionChange)="barangayId.set($event.value)">@for (barangay of barangays; track barangay.id) { <mat-option [value]="barangay.id">{{ barangay.name }}, {{ barangay.city }}</mat-option> }</mat-select></mat-form-field>
+
+    <h2>Marketplace notifications</h2>
+    <mat-slide-toggle [checked]="marketplaceAlerts()" (change)="marketplaceAlerts.set($event.checked)">Receive free listings in my area</mat-slide-toggle>
+    <div class="radius-control">
+      <div><strong>Proximity radius</strong><span>{{ marketplaceRadius() }} km</span></div>
+      <mat-slider min="0" max="100" step="1"><input matSliderThumb [value]="marketplaceRadius()" (valueChange)="marketplaceRadius.set($event)"></mat-slider>
+    </div>
+
+    <h2>Notification preferences</h2>
+    <mat-slide-toggle [checked]="notifications().incidents" (change)="notifications.update(prefs => ({ ...prefs, incidents: $event.checked }))">Emergency reports</mat-slide-toggle>
+    <mat-slide-toggle [checked]="notifications().announcements" (change)="notifications.update(prefs => ({ ...prefs, announcements: $event.checked }))">Official announcements</mat-slide-toggle>
+    <mat-slide-toggle [checked]="notifications().messages" (change)="notifications.update(prefs => ({ ...prefs, messages: $event.checked }))">Private messages</mat-slide-toggle>
+
+    <h2>Community Profile Status</h2>
+    <div class="status-card" [class]="accountStatus.label.toLowerCase().replace(' ', '-')">
+      <div><strong>{{ accountStatus.label }}</strong><span>{{ auth.account()?.violationCount ?? 0 }} / 100 reported cases</span></div>
+      @if (auth.account()?.banned) { <span class="status-badge banned">Permanently banned</span> }
+      @else if (auth.account()?.suspendedUntil) { <span class="status-badge suspended">Suspended</span> }
+    </div>
+    @if (accountStatus.suspensionDays > 0) { <p class="status-help">Suspension period: {{ accountStatus.suspensionDays }} days</p> }
+
+    <div class="save"><span class="saved" [class.visible]="saved()">Changes saved</span><button mat-flat-button (click)="save()">Save changes</button></div>
+  </mat-card>
+</div>

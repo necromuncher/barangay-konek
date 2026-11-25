@@ -1,0 +1,131 @@
+<header class="topbar">
+  <button class="menu-button" mat-icon-button aria-label="Toggle navigation" (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div class="topbar-brand">
+    <div class="topbar-logo"><mat-icon>home_work</mat-icon></div>
+    <div class="topbar-title">Barangay Konek</div>
+  </div>
+
+  <div class="topbar-actions">
+    @if (auth.account()) {
+    <button class="global-search-button" mat-icon-button aria-label="Search community and listings" [attr.aria-expanded]="searchOpen()" (click)="toggleSearch()">
+      <mat-icon>search</mat-icon>
+    </button>
+    @if (searchOpen()) {
+      <section class="global-search-panel" aria-label="Global search">
+        <label for="global-search-input">Search community and marketplace</label>
+        <div class="global-search-input"><mat-icon>search</mat-icon><input id="global-search-input" type="search" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Posts, items, categories, locations"></div>
+        @if (!searchTerm().trim()) { <p class="search-hint">Search posts, free items, categories, or barangays.</p> }
+        @if (searchTerm().trim()) {
+          <div class="search-group">
+            <h3>Community posts</h3>
+            @for (post of searchPosts(); track post.id) {
+              <button type="button" (click)="openSearchPost(post.id)"><mat-icon>forum</mat-icon><span><strong>{{ post.title }}</strong><small>{{ post.author }} · {{ post.type }}</small></span></button>
+            } @empty { <p class="search-empty">No matching community posts.</p> }
+          </div>
+          <div class="search-group">
+            <h3>Marketplace listings</h3>
+            @for (listing of searchListings(); track listing.id) {
+              <button type="button" (click)="openSearchListing(listing.id)"><mat-icon>storefront</mat-icon><span><strong>{{ listing.title }}</strong><small>{{ listing.category }} · {{ auth.getBarangay(listing.barangayId)?.name || 'Quezon Province' }}</small></span></button>
+            } @empty { <p class="search-empty">No matching marketplace listings.</p> }
+          </div>
+        }
+      </section>
+    }
+    <button class="inbox-button" mat-icon-button aria-label="Messages" routerLink="/messages">
+      <mat-icon aria-hidden="false" [matBadge]="messaging.unreadCount(auth.account()?.id)" matBadgeSize="small" matBadgeColor="warn" [matBadgeHidden]="!messaging.unreadCount(auth.account()?.id)">mail_outline</mat-icon>
+    </button>
+    <button mat-icon-button [attr.aria-label]="unreadNotificationCount() ? 'Notifications, ' + unreadNotificationCount() + ' unread' : 'Notifications'" [matMenuTriggerFor]="notificationMenu">
+      <mat-icon aria-hidden="false" [matBadge]="unreadNotificationCount()" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" [matBadgeHidden]="unreadNotificationCount() === 0">notifications_none</mat-icon>
+    </button>
+    <mat-menu #notificationMenu="matMenu" class="notification-menu">
+      <div class="notification-head">
+        <div><strong>Notifications</strong><small>{{ unreadNotificationCount() }} unread</small></div>
+        @if (unreadNotificationCount()) { <button mat-button type="button" (click)="wall.markNotificationsRead()">Mark all read</button> }
+      </div>
+      @for (item of wall.notificationsFor(auth.account()?.id); track item.id) {
+        <button mat-menu-item [class.unread]="item.unread" (click)="wall.markNotificationRead(item.id); openNotification(item)">
+          <mat-icon>{{ item.kind === 'marketplace' ? 'storefront' : item.kind === 'message' ? 'mail' : item.kind === 'violation' ? 'gavel' : 'forum' }}</mat-icon>
+          <span><strong>{{ item.title }}</strong><small>{{ item.detail }}</small></span>
+        </button>
+      }
+    </mat-menu>
+    <div class="topbar-profile">
+      @if (auth.account()?.photoUrl; as photoUrl) { <img class="avatar profile-avatar" [src]="photoUrl" alt=""> }
+      @else { <div class="avatar">{{ auth.account()?.name?.charAt(0) || 'A' }}{{ auth.account()?.name?.split(' ')[1]?.charAt(0) || '' }}</div> }
+      <div><strong>{{ auth.account()?.name || 'Alex Mendoza' }}</strong><small>{{ auth.account()?.role || 'Resident' }}</small></div>
+      <button mat-icon-button aria-label="Log out" title="Log out" (click)="logout()"><mat-icon>logout</mat-icon></button>
+    </div>
+    } @else {
+      <a mat-button routerLink="/">Home</a>
+      <a mat-flat-button routerLink="/auth">Sign in</a>
+    }
+  </div>
+</header>
+@if (storage.error(); as storageError) {
+  <div class="persistence-error" role="alert"><mat-icon>warning</mat-icon>{{ storageError }}</div>
+}
+
+<mat-sidenav-container class="shell">
+  <mat-sidenav mode="side" opened class="sidebar">
+    <nav class="nav-list" aria-label="Main navigation">
+      @if (auth.account()) {
+      <p class="sidebar-heading">Workspace</p>
+      <a class="nav-item" routerLink="dashboard" routerLinkActive="active" title="Dashboard">
+        <span class="nav-icon"><mat-icon aria-hidden="true">dashboard</mat-icon></span><span class="nav-label">Dashboard</span>
+      </a>
+      <a class="nav-item" routerLink="community" routerLinkActive="active" title="Community">
+        <span class="nav-icon"><mat-icon aria-hidden="true">forum</mat-icon></span><span class="nav-label">Community</span>
+      </a>
+      <a class="nav-item" routerLink="marketplace" routerLinkActive="active" title="Marketplace">
+        <span class="nav-icon"><mat-icon aria-hidden="true">storefront</mat-icon></span><span class="nav-label">Marketplace</span>
+      </a>
+      <a class="nav-item" routerLink="messages" routerLinkActive="active" title="Messages">
+        <span class="nav-icon"><mat-icon aria-hidden="true">mail_outline</mat-icon>@if (messaging.unreadCount(auth.account()?.id); as unreadCount) { <span class="nav-badge">{{ unreadCount }}</span> }</span><span class="nav-label">Messages</span>
+      </a>
+      @if (auth.account()?.role !== 'resident') {
+        <a class="nav-item" routerLink="admin" routerLinkActive="active" title="Admin">
+          <span class="nav-icon"><mat-icon aria-hidden="true">admin_panel_settings</mat-icon>@if (wall.incidentCount(); as incidentCount) { <span class="nav-badge">{{ incidentCount }}</span> }</span><span class="nav-label">Admin</span>
+        </a>
+      }
+      @if (auth.account()?.role === 'superuser') {
+        <a class="nav-item" routerLink="system-logs" routerLinkActive="active" title="System Logs">
+          <span class="nav-icon"><mat-icon aria-hidden="true">manage_search</mat-icon></span><span class="nav-label">System Logs</span>
+        </a>
+      }
+      <a class="nav-item" routerLink="profile" routerLinkActive="active" title="Profile">
+        <span class="nav-icon"><mat-icon aria-hidden="true">person</mat-icon></span><span class="nav-label">Profile</span>
+      </a>
+      } @else {
+        <p class="sidebar-heading">Browse</p>
+        <a class="nav-item" routerLink="/community" routerLinkActive="active" title="Community">
+          <span class="nav-icon"><mat-icon aria-hidden="true">forum</mat-icon></span><span class="nav-label">Community</span>
+        </a>
+        <a class="nav-item" routerLink="/marketplace" routerLinkActive="active" title="Marketplace">
+          <span class="nav-icon"><mat-icon aria-hidden="true">storefront</mat-icon></span><span class="nav-label">Marketplace</span>
+        </a>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <main class="content"><router-outlet /></main>
+
+    <nav class="bottom-nav" [class.has-admin]="!!auth.account() && auth.account()?.role !== 'resident'" aria-label="Primary navigation">
+      @if (auth.account()) {
+      <a routerLink="dashboard" routerLinkActive="active"><mat-icon>dashboard</mat-icon><span>Home</span></a>
+      <a routerLink="community" routerLinkActive="active"><mat-icon>forum</mat-icon><span>Community</span></a>
+      <a routerLink="marketplace" routerLinkActive="active"><mat-icon>storefront</mat-icon><span>Market</span></a>
+      @if (auth.account()?.role !== 'resident') { <a routerLink="admin" routerLinkActive="active"><mat-icon>admin_panel_settings</mat-icon><span>Admin</span></a> }
+      <a routerLink="profile" routerLinkActive="active"><mat-icon>person</mat-icon><span>Profile</span></a>
+      } @else {
+        <a routerLink="/community" routerLinkActive="active"><mat-icon>forum</mat-icon><span>Community</span></a>
+        <a routerLink="/marketplace" routerLinkActive="active"><mat-icon>storefront</mat-icon><span>Marketplace</span></a>
+      }
+    </nav>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+@if (auth.account()) { <app-mini-messenger /> }

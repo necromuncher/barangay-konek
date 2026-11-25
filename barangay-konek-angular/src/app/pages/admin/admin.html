@@ -1,0 +1,152 @@
+<header class="page-head">
+  <div><p class="eyebrow">Administration</p><h1>Barangay Management</h1><p>Review incidents, violations, and community directory records.</p></div>
+</header>
+
+<div class="admin-layout">
+  <main>
+    @if (canManageDirectory) {
+      <mat-card class="panel roles-assignment">
+        <div class="card-head">
+          <div><p class="eyebrow">Superuser</p><h2>Roles Assignment</h2></div>
+          <span class="count">{{ roleAssignmentUsers.length }} users</span>
+        </div>
+        <div class="role-assignment-filters">
+          <label>City
+            <select [value]="roleCity()" (change)="setRoleCity($event)">
+              <option value="">All cities</option>
+              @for (city of roleAssignmentCities; track city) { <option [value]="city">{{ city }}</option> }
+            </select>
+          </label>
+          <label>Barangay
+            <select [value]="roleBarangayId()" (change)="setRoleBarangay($event)">
+              <option value="">All barangays</option>
+              @for (barangay of roleAssignmentBarangays; track barangay.id) { <option [value]="barangay.id">{{ barangay.name }}</option> }
+            </select>
+          </label>
+          <label class="role-search">Search users
+            <input type="search" [ngModel]="roleSearch()" (ngModelChange)="setRoleSearch($event)" placeholder="Search by name">
+          </label>
+        </div>
+        <div class="role-assignment-table">
+          <div class="role-assignment-header"><span>User</span><span>Officer</span><span>Captain</span></div>
+          @for (account of roleAssignmentUsers; track account.id) {
+            <div class="role-assignment-row">
+              <div class="role-assignment-user">
+                <strong>{{ account.name }}</strong>
+                <small>{{ auth.getBarangay(account.barangayId)?.city }} · {{ auth.getBarangay(account.barangayId)?.name }}</small>
+              </div>
+              <label class="role-checkbox"><input type="checkbox" [checked]="roleForAssignment(account) === 'officer'" (change)="setRoleDraft(account, 'officer', $event)"><span>Officer</span></label>
+              <label class="role-checkbox"><input type="checkbox" [checked]="roleForAssignment(account) === 'captain'" (change)="setRoleDraft(account, 'captain', $event)"><span>Captain</span></label>
+            </div>
+          } @empty {
+            <p class="empty">No users match these city, barangay, and search filters.</p>
+          }
+        </div>
+        <div class="role-assignment-footer">
+          <span>{{ roleChangesCount }} unsaved {{ roleChangesCount === 1 ? 'change' : 'changes' }}</span>
+          <button mat-flat-button type="button" [disabled]="!roleChangesCount || roleSaving()" (click)="saveRoleAssignments()">{{ roleSaving() ? 'Saving…' : 'Save roles' }}</button>
+        </div>
+      </mat-card>
+    }
+
+    @if (canViewIncidentGraphs) {
+      <app-incident-analytics [incidents]="graphIncidents" />
+    }
+
+    <mat-card class="panel">
+      <div class="card-head">
+        <div>
+          @if (selectedPurok()) { <button mat-icon-button (click)="clearPurok()" aria-label="Back to all queues"><mat-icon>chevron_left</mat-icon></button> }
+          <p class="eyebrow">Incident queues</p>
+          <h2>{{ selectedPurok() ? selectedPurok() + ' Incident Queues' : 'All Barangay Incident Queues' }}</h2>
+        </div>
+        <span class="count">{{ incidents.length }}</span>
+      </div>
+      @for (incident of incidents; track incident.id) {
+        <button class="incident" type="button" (click)="openIncident(incident.id)">
+          <div><strong>{{ incident.title }}</strong><small>{{ incident.purok || 'Barangay' }} · {{ incident.timestamp }}</small></div>
+          <span class="badge" [class.resolved]="incident.type === 'incident' && wall.incidentStatus(incident) === 'resolved'" [class.unresolved]="incident.type === 'incident' && wall.incidentStatus(incident) === 'unresolved'">{{ incident.type === 'incident' ? wall.incidentStatusLabel(incident) : incident.severity || 'Incident' }}</span>
+        </button>
+      } @empty { <p class="empty">No incidents match this Purok/Zone.</p> }
+    </mat-card>
+
+    <mat-card class="panel">
+      <div class="card-head"><div><p class="eyebrow">Community health</p><h2>User violations by severity</h2></div></div>
+      <div class="severity-chart">
+        @for (entry of severityCounts() | keyvalue; track entry.key) {
+          <div class="chart-row"><span>{{ entry.key }}</span><div><i [style.width.%]="severityBarWidth(entry.value)"></i></div><strong>{{ entry.value }}</strong></div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="panel">
+      <div class="card-head"><div><p class="eyebrow">Violations</p><h2>Users under report ranges</h2></div></div>
+      @for (account of violatedAccounts; track account.id) {
+        <button class="user-row" type="button" (click)="selectedUserId.set(account.id)">
+          <div class="mini-avatar blue">{{ account.name.charAt(0) }}</div>
+          <div><strong>{{ account.name }}</strong><small>{{ account.violationCount }} reports · {{ statusLabel(account.id) }}</small></div>
+          @if (account.banned) { <span class="badge resolved">Banned</span> }
+          @else if (account.suspendedUntil) { <span class="badge medium">Suspended</span> }
+        </button>
+      } @empty { <p class="empty">No users have recorded violations.</p> }
+      @if (selectedUser) {
+        <div class="user-detail">
+          <h3>{{ selectedUser.name }}</h3>
+          <p>{{ selectedUser.email || 'Email private' }} · {{ selectedUser.mobile || 'Mobile private' }}</p>
+          <p><strong>{{ selectedUser.violationCount ?? 0 }} reports</strong> — {{ statusLabel(selectedUser.id) }}</p>
+          <button mat-flat-button color="warn" [disabled]="selectedUser.banned" (click)="banSelectedUser()">{{ selectedUser.banned ? 'Permanently banned' : 'Permanently ban user' }}</button>
+        </div>
+      }
+    </mat-card>
+
+    <mat-card class="panel">
+      <div class="card-head"><div><p class="eyebrow">Moderation</p><h2>Banned words</h2></div></div>
+      <div class="word-add">
+        <mat-form-field appearance="outline"><mat-label>Add prohibited word or phrase</mat-label><input matInput [ngModel]="bannedWord()" (ngModelChange)="bannedWord.set($event)" (keyup.enter)="addBannedWord()"></mat-form-field>
+        <button mat-flat-button (click)="addBannedWord()" [disabled]="!bannedWord().trim()">Add</button>
+      </div>
+      <div class="word-list">
+        @for (word of wall.bannedWords(); track word) {
+          <button type="button" (click)="removeBannedWord(word)">{{ word }}<mat-icon>close</mat-icon></button>
+        }
+      </div>
+    </mat-card>
+  </main>
+
+  <aside>
+    <mat-card class="panel directory">
+      <div class="card-head"><div><p class="eyebrow">Directory</p><h2>Barangays and Purok/Zone</h2></div></div>
+      <p class="directory-note">Purok/Zone labels are demo placeholders pending an authoritative local directory.</p>
+      @if (directoryError()) { <p class="form-error">{{ directoryError() }}</p> }
+      @for (barangay of directoryEntries; track barangay.id) {
+        <div class="barangay-directory">
+          <strong>{{ barangay.name }}</strong><small>{{ barangay.city }}</small>
+          @for (purok of wall.puroks().find(item => item.barangayId === barangay.id)?.puroks || []; track purok) {
+            <button type="button" [class.active]="selectedPurok() === purok && selectedPurokBarangayId() === barangay.id" (click)="selectPurok(purok, barangay.id)">{{ purok }}<mat-icon>chevron_right</mat-icon></button>
+          }
+          @if (canManageDirectory) {
+            <div class="directory-actions">
+              <button mat-icon-button aria-label="Edit barangay" (click)="editBarangay(barangay)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button aria-label="Delete barangay" (click)="deleteBarangay(barangay)"><mat-icon>delete</mat-icon></button>
+            </div>
+          }
+        </div>
+      }
+      @if (canManageDirectory) {
+        <button mat-stroked-button type="button" (click)="editBarangay()"><mat-icon>add</mat-icon>Add barangay</button>
+      }
+      @if (canManageDirectory && editingBarangayId() !== null) {
+        <div class="directory-form">
+          <h3>{{ editingBarangayId() ? 'Edit barangay' : 'Add barangay' }}</h3>
+          <mat-form-field appearance="outline"><mat-label>Barangay name</mat-label><input matInput [ngModel]="barangayName()" (ngModelChange)="barangayName.set($event)"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>City or municipality</mat-label><input matInput [ngModel]="barangayCity()" (ngModelChange)="barangayCity.set($event)"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Province</mat-label><input matInput [ngModel]="barangayProvince()" (ngModelChange)="barangayProvince.set($event)"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Latitude (optional)</mat-label><input matInput type="number" [ngModel]="barangayLatitude()" (ngModelChange)="barangayLatitude.set($event)"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Longitude (optional)</mat-label><input matInput type="number" [ngModel]="barangayLongitude()" (ngModelChange)="barangayLongitude.set($event)"></mat-form-field>
+          @if (directoryError()) { <p class="form-error">{{ directoryError() }}</p> }
+          <div class="form-actions"><button mat-button (click)="editBarangay()">Cancel</button><button mat-flat-button (click)="saveBarangay()">Save barangay</button></div>
+        </div>
+      }
+    </mat-card>
+  </aside>
+</div>

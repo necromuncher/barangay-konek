@@ -1,0 +1,195 @@
+<header class="community-hero" [class.has-banner]="communityBanner">
+  @if (communityBanner; as banner) {
+    <img class="community-hero-image" [src]="banner" alt="">
+  }
+  <div class="community-hero-shade"></div>
+  <div class="community-hero-content">
+    <div class="community-hero-copy">
+      <p class="eyebrow">{{ bannerLocationName }} Community</p>
+      <h1>Community Wall</h1>
+      <p>Updates, reports, announcements, and events near you.</p>
+    </div>
+    <div class="community-hero-actions">
+      @if (auth.account()?.role === 'superuser') {
+        <mat-form-field appearance="outline" class="banner-location-select">
+          <mat-label>Banner location</mat-label>
+          <mat-select [value]="bannerBarangayId" (selectionChange)="bannerLocationSelection.set($event.value)">
+            @for (barangay of auth.getBarangays(); track barangay.id) {
+              <mat-option [value]="barangay.id">{{ barangay.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      @if (canManageBanner) {
+        <input #bannerFile type="file" accept="image/*" hidden (change)="onBannerUpload($event)">
+        <button mat-stroked-button type="button" class="banner-upload" [disabled]="bannerProcessing() || !bannerBarangayId" (click)="bannerFile.click()">
+          <mat-icon>{{ communityBanner ? 'edit' : 'photo_camera' }}</mat-icon>
+          {{ bannerProcessing() ? 'Preparing…' : communityBanner ? 'Change banner' : 'Add banner' }}
+        </button>
+      }
+      @if (auth.account()) {
+        <button mat-flat-button (click)="creating.set(!creating())">
+          <mat-icon>{{ creating() ? 'close' : 'add' }}</mat-icon>
+          {{ creating() ? 'Cancel' : 'Create post' }}
+        </button>
+      }
+    </div>
+  </div>
+</header>
+
+@if (wall.notification()) {
+  <div class="incident-toast"><mat-icon>notifications_active</mat-icon><div><strong>Incident reported</strong><span>{{ wall.notification() }}</span></div></div>
+}
+
+@if (creating() && auth.account()) {
+  <mat-card class="composer">
+    <div class="composer-head"><div class="mini-avatar blue">{{ authorInitials(auth.account()?.name || 'Resident') }}</div><div><strong>{{ auth.account()?.name }}</strong><small>Posting to {{ communityName }}</small></div></div>
+    <mat-form-field appearance="outline"><mat-label>Post type</mat-label><mat-select [value]="postType()" (selectionChange)="postType.set($event.value)"><mat-option value="update">Update</mat-option><mat-option value="incident">Incident report</mat-option>@if (auth.account()?.role !== 'resident') { <mat-option value="announcement">Official announcement</mat-option><mat-option value="event">Event</mat-option> }</mat-select></mat-form-field>
+    @if (postType() === 'incident') {
+      <mat-form-field appearance="outline"><mat-label>Severity</mat-label><mat-select [value]="severity()" (selectionChange)="severity.set($event.value)"><mat-option value="low">Low</mat-option><mat-option value="medium">Medium</mat-option><mat-option value="high">High</mat-option><mat-option value="critical">Critical</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Purok or Zone</mat-label><mat-select [value]="postPurok()" (selectionChange)="postPurok.set($event.value)">@for (purok of availablePuroks; track purok) { <mat-option [value]="purok">{{ purok }}</mat-option> }</mat-select></mat-form-field>
+    }
+    <mat-form-field appearance="outline"><mat-label>Title</mat-label><input matInput [ngModel]="postTitle()" (ngModelChange)="postTitle.set($event)" placeholder="What would you like to share?"></mat-form-field>
+    <mat-form-field appearance="outline" class="body-field"><mat-label>Details</mat-label><textarea matInput rows="4" [ngModel]="postBody()" (ngModelChange)="postBody.set($event)" placeholder="Add location, context, or useful details..."></textarea></mat-form-field>
+    @if (postPhotos().length) {
+      <div class="composer-photos">
+        @for (photo of postPhotos(); track $index) {
+          <div><img [src]="photo" alt="Post attachment"><button mat-icon-button type="button" (click)="removePostPhoto($index)" aria-label="Remove photo"><mat-icon>close</mat-icon></button></div>
+        }
+      </div>
+    }
+    <div class="composer-actions">
+      <label class="photo-button"><mat-icon>photo_camera</mat-icon>Photos (up to 4, optimized)<input type="file" accept="image/*" multiple [disabled]="imagesProcessing()" (change)="onPostPhoto($event)"></label>
+      <button mat-flat-button [disabled]="imagesProcessing() || !postTitle().trim() || !postBody().trim()" (click)="submitPost()">{{ imagesProcessing() ? 'Optimizing photos…' : 'Post to community' }}</button>
+    </div>
+  </mat-card>
+}
+
+<div class="filters">
+  <button [class.active]="filter() === 'all'" (click)="setFilter('all')">All</button>
+  <button [class.active]="filter() === 'update'" (click)="setFilter('update')">Updates</button>
+  <button [class.active]="filter() === 'incident'" (click)="setFilter('incident')">Incidents</button>
+  <button [class.active]="filter() === 'announcement'" (click)="setFilter('announcement')">Announcements</button>
+  <button [class.active]="filter() === 'event'" (click)="setFilter('event')">Events</button>
+</div>
+
+@if (severityFilter(); as severity) {
+  <div class="severity-filter-note">
+    <span><mat-icon>filter_alt</mat-icon> Showing {{ severity }} severity incidents</span>
+    <button mat-button type="button" (click)="clearSeverityFilter()">Clear filter</button>
+  </div>
+}
+
+@if (selectedPost) {
+  <ng-container>
+    <button class="back-button" mat-button (click)="closePost()"><mat-icon>arrow_back</mat-icon>Back to wall</button>
+    <ng-container [ngTemplateOutlet]="postCard" [ngTemplateOutletContext]="{ $implicit: selectedPost, detail: true }"></ng-container>
+  </ng-container>
+} @else {
+  <div class="feed">
+    @for (post of filteredPosts; track post.id) {
+      <ng-container [ngTemplateOutlet]="postCard" [ngTemplateOutletContext]="{ $implicit: post, detail: false }"></ng-container>
+    }
+  </div>
+}
+
+<ng-template #postCard let-post let-detail="detail">
+  <mat-card class="post" [class.incident]="post.type === 'incident'" (click)="detail ? null : openPost(post.id)">
+    <div class="post-top">
+      <div class="post-author">
+        @if (auth.account()) {
+          <button type="button" class="mini-avatar profile-trigger" [class.official]="post.role !== 'Resident'" [attr.aria-label]="'Message ' + post.author" (click)="messageAuthor(post.authorId, post.author); $event.stopPropagation()">
+          @if (profilePhoto(post.authorId, post.author); as photo) { <img [src]="photo" alt=""> }
+          @else { {{ post.initials }} }
+          </button>
+        } @else {
+          <div class="mini-avatar" [class.official]="post.role !== 'Resident'">
+            @if (profilePhoto(post.authorId, post.author); as photo) { <img [src]="photo" alt=""> }
+            @else { {{ post.initials }} }
+          </div>
+        }
+        <div><strong>{{ post.author }}</strong><small>{{ post.role }} · {{ post.timestamp }}</small></div>
+      </div>
+      <span class="post-type" [class]="post.type">{{ typeLabel(post.type) }}</span>
+    </div>
+
+    @if (post.type === 'incident' && post.severity) {
+      <div class="severity" [class]="post.severity"><mat-icon>warning</mat-icon>{{ post.severity }} severity</div>
+    }
+
+    <div class="post-content">
+      <div>
+        <h2>{{ post.title }}</h2>
+        <p class="post-body">{{ post.body }}</p>
+        @if (post.resolved) { <span class="resolved-tag"><mat-icon>verified</mat-icon>Resolved incident</span> }
+        @if (post.type === 'incident' && wall.incidentStatus(post) === 'unresolved') { <span class="unresolved-tag"><mat-icon>schedule</mat-icon>Unresolved · 30+ days</span> }
+      </div>
+      @if (!detail && post.photos?.length) {
+        <app-post-photo-gallery class="post-thumbnail-gallery" [photos]="post.photos!" [title]="post.title" mode="thumbnail" />
+      }
+      @if (!detail && !post.photos?.length) { <div class="post-thumbnail placeholder"><mat-icon>image</mat-icon></div> }
+    </div>
+    @if (detail && post.photos?.length) {
+      <app-post-photo-gallery [photos]="post.photos!" [title]="post.title" mode="detail" />
+    }
+
+    @if (auth.account()) {
+    <div class="post-actions" (click)="$event.stopPropagation()">
+      <button mat-button [class.liked]="post.liked" (click)="wall.toggleLike(post.id)"><mat-icon>{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon><span>{{ post.likes }} {{ post.likes === 1 ? 'Like' : 'Likes' }}</span></button>
+      <button mat-button (click)="toggleComments(post.id)"><mat-icon>chat_bubble_outline</mat-icon><span>{{ post.comments.length }} {{ post.comments.length === 1 ? 'Comment' : 'Comments' }}</span></button>
+      <button mat-button (click)="reportPost(post.id)"><mat-icon>flag</mat-icon><span>Report post</span></button>
+      <button mat-button (click)="reportAuthor(post.authorId, post.author)"><mat-icon>person_off</mat-icon><span>Report author</span></button>
+    </div>
+    }
+
+    @if (detail || commentsExpanded(post.id)) {
+      <section class="comments" (click)="$event.stopPropagation()">
+        @for (comment of post.comments; track comment.id) {
+          <div class="comment">
+            @if (auth.account()) {
+              <button type="button" class="comment-avatar profile-trigger" [attr.aria-label]="'Message ' + comment.author" (click)="messageAuthor(comment.authorId, comment.author); $event.stopPropagation()">
+                @if (profilePhoto(comment.authorId, comment.author); as photo) { <img [src]="photo" alt=""> }
+                @else { {{ authorInitials(comment.author) }} }
+              </button>
+            } @else {
+              <div class="comment-avatar">
+                @if (profilePhoto(comment.authorId, comment.author); as photo) { <img [src]="photo" alt=""> }
+                @else { {{ authorInitials(comment.author) }} }
+              </div>
+            }
+            <div class="comment-copy">
+              <div><strong>{{ comment.author }}</strong><small>{{ comment.timestamp }}</small></div>
+              <p>{{ comment.text }}</p>
+              @if (comment.photo) { <img [src]="comment.photo" alt="Comment photo"> }
+              @if (auth.account()) {
+                <button class="comment-report" type="button" (click)="reportComment(post.id, comment.id); $event.stopPropagation()"><mat-icon>flag</mat-icon>Report user</button>
+              }
+            </div>
+          </div>
+        }
+        @if (post.comments.length === 0) { <p class="empty-comments">{{ auth.account() ? 'Be the first to comment.' : 'No comments yet.' }}</p> }
+        @if (auth.account()) {
+        <div class="comment-composer"><div class="comment-avatar self">AM</div><div class="comment-input"><input [ngModel]="commentText()[post.id]" (ngModelChange)="setCommentText(post.id, $event)" placeholder="Write a comment..." (keyup.enter)="submitComment(post.id)"><label title="Attach photo"><mat-icon>photo_camera</mat-icon><input type="file" accept="image/*" (change)="onCommentPhoto($event, post.id)"></label><button mat-icon-button (click)="submitComment(post.id)" [disabled]="!commentText()[post.id]?.trim() && !commentPhoto()[post.id]"><mat-icon>send</mat-icon></button></div></div>
+        @if (commentPhoto()[post.id]) { <img class="comment-preview" [src]="commentPhoto()[post.id]" alt="Comment attachment preview"> }
+        }
+      </section>
+    }
+
+    @if (detail && canResolve(post) && !post.resolved) {
+      <section class="resolve-section" (click)="$event.stopPropagation()">
+        <h3>Resolve incident</h3>
+        <input [ngModel]="resolutionText()[post.id]" (ngModelChange)="setResolutionText(post.id, $event)" placeholder="Required resolution comment or attach evidence">
+        <label class="photo-button"><mat-icon>photo_camera</mat-icon>Attach evidence<input type="file" accept="image/*" (change)="onResolutionPhoto($event, post.id)"></label>
+        @if (resolutionPhoto()[post.id]) { <img class="resolution-preview" [src]="resolutionPhoto()[post.id]" alt="Resolution evidence"> }
+        <button mat-flat-button [disabled]="!resolutionText()[post.id]?.trim() && !resolutionPhoto()[post.id]" (click)="resolveIncident(post.id)">Mark resolved</button>
+      </section>
+    }
+    @if (post.resolved) {
+      <section class="resolution-evidence">
+        @if (post.resolutionComment) { <p><strong>Resolution:</strong> {{ post.resolutionComment }}</p> }
+        @if (post.resolutionPhoto) { <img [src]="post.resolutionPhoto" alt="Resolution evidence"> }
+      </section>
+    }
+  </mat-card>
+</ng-template>
+

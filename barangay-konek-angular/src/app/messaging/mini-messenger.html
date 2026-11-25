@@ -1,0 +1,38 @@
+@if (messaging.miniConversation(); as conversation) {
+  @if (messaging.miniMinimized()) {
+    <button class="mini-chat-minimized" type="button" (click)="messaging.restoreMiniConversation()" aria-label="Restore private message window">
+      <mat-icon>chat</mat-icon><span>{{ conversation.name }}</span>
+    </button>
+  } @else {
+    <aside class="mini-chat" role="dialog" aria-label="Private message window">
+      <header class="mini-chat-header">
+        <div class="mini-chat-identity">
+          @if (recipient()?.photoUrl; as photoUrl) { <img [src]="photoUrl" alt=""> }
+          @else { <span>{{ conversation.name.charAt(0).toUpperCase() }}</span> }
+          <div><strong>{{ conversation.name }}</strong><small>Private message</small></div>
+        </div>
+        <div class="mini-chat-controls">
+          <button mat-icon-button type="button" aria-label="Minimize private message window" (click)="messaging.minimizeMiniConversation()"><mat-icon>remove</mat-icon></button>
+          <button mat-icon-button type="button" aria-label="Close private message window" (click)="messaging.closeMiniConversation()"><mat-icon>close</mat-icon></button>
+        </div>
+      </header>
+      @if (unavailableMessage(); as message) {
+        <div class="mini-chat-unavailable"><mat-icon>info</mat-icon><p>{{ message }}</p></div>
+      } @else {
+        <div class="mini-chat-messages" aria-live="polite">
+          @for (message of messages(); track message.id) {
+            <div class="mini-chat-row" [class.own]="message.senderId === auth.account()?.id">
+              <div class="mini-chat-bubble"><p>{{ message.text }}</p><time>{{ message.sentAt | date:'shortTime' }}</time></div>
+            </div>
+          } @empty {
+            <p class="mini-chat-empty">Start a private conversation with {{ conversation.name }}.</p>
+          }
+        </div>
+        <form class="mini-chat-compose" (ngSubmit)="send()">
+          <input type="text" name="miniMessage" maxlength="1000" autocomplete="off" placeholder="Write a message..." aria-label="Write a private message" [disabled]="!messaging.ready()" [ngModel]="messaging.miniDraft()" (ngModelChange)="messaging.miniDraft.set($event)">
+          <button mat-icon-button type="submit" aria-label="Send private message" [disabled]="!messaging.ready() || !messaging.miniDraft().trim()"><mat-icon>send</mat-icon></button>
+        </form>
+      }
+    </aside>
+  }
+}

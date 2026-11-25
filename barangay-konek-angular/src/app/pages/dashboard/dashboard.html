@@ -1,0 +1,47 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">{{ isSuperuser ? 'Quezon province overview' : currentBarangayName }}</p>
+    <h1>{{ greeting }}, {{ auth.account()?.name?.split(' ')?.[0] || 'Neighbor' }}</h1>
+    <p>{{ isSuperuser ? 'A province-wide look at Barangay Konek.' : 'Here is what is happening in ' + currentBarangayName + '.' }}</p>
+  </div>
+  <a mat-flat-button routerLink="/community"><mat-icon>add</mat-icon>New report</a>
+</header>
+
+@if (isSuperuser) {
+  <section class="stats superuser-stats">
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="teal">groups</mat-icon><span>Registered users</span></div><strong class="stat-count">{{ auth.accounts().length }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="gold">warning</mat-icon><span>Open incidents</span></div><strong class="stat-count">{{ openIncidents }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="blue">location_city</mat-icon><span>Registered barangays</span></div><strong class="stat-count">{{ auth.getBarangays().length }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="teal">storefront</mat-icon><span>Free listings</span></div><strong class="stat-count">{{ nearbyListings.length }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="violet">mail</mat-icon><span>Unread messages</span></div><strong class="stat-count">{{ unreadMessages }}</strong></mat-card>
+  </section>
+} @else {
+  <section class="stats">
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="teal">campaign</mat-icon><span>Announcements</span></div><strong class="stat-count">{{ announcementCount }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="gold">warning</mat-icon><span>Open incidents</span></div><strong class="stat-count">{{ openIncidents }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="blue">inventory_2</mat-icon><span>Free listings</span></div><strong class="stat-count">{{ nearbyListings.length }}</strong></mat-card>
+    <mat-card class="stat-card"><div class="stat-heading"><mat-icon class="violet">mail</mat-icon><span>Unread messages</span></div><strong class="stat-count">{{ unreadMessages }}</strong></mat-card>
+  </section>
+}
+
+@if (canViewIncidentAnalytics) {
+  <app-incident-analytics class="dashboard-incident-analytics" [incidents]="graphIncidents" [showSeverity]="true" />
+}
+
+<section class="two-col">
+  <mat-card class="wide">
+    <div class="card-head"><div><p class="eyebrow">Community</p><h2>Latest updates</h2></div><a mat-button routerLink="/community">View all</a></div>
+    @for (post of posts.slice(0, 4); track post.id) {
+      <a class="update" [class.incident-update]="post.type === 'incident'" [routerLink]="['/community']" [queryParams]="{ post: post.id }" [attr.aria-label]="'View community post: ' + post.title">
+        <div class="mini-avatar" [class.green]="post.role !== 'Resident'">{{ post.initials }}</div>
+        <div><strong>{{ post.author }}</strong><small>{{ post.timestamp }} · {{ post.type }}</small><p>{{ post.title }} — {{ post.body }}</p></div>
+      </a>
+    } @empty { <p class="empty-state">No community updates yet.</p> }
+  </mat-card>
+  <mat-card>
+    <div class="card-head"><div><p class="eyebrow">Nearby</p><h2>Free today</h2></div><a mat-button routerLink="/marketplace">See all</a></div>
+    @for (listing of nearbyListings.slice(0, 4); track listing.id) {
+      <a class="listing-row" [routerLink]="['/marketplace', listing.id]"><div class="listing-thumb"><mat-icon>redeem</mat-icon></div><div><strong>{{ listing.title }}</strong><small>{{ listing.distanceKm }} km away · {{ listing.category }}</small></div></a>
+    } @empty { <p class="empty-state">No free items available right now.</p> }
+  </mat-card>
+</section>
