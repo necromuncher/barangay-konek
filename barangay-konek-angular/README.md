@@ -17,14 +17,29 @@ Barangay Konek is a mobile-first Angular community app for Quezon Province. Supa
 
 ## Run locally
 
-Requirements: Node.js and npm.
+Requirements: Node.js and npm. From this directory, install dependencies and start the Angular development server:
 
 ```bash
 npm install
 npm start
 ```
 
-Open `http://localhost:4200/`. The Angular development server reloads when source files change.
+Open `http://localhost:4200/`. The development server reloads when source files change.
+
+In PowerShell, if script execution policy blocks `npm`, use the Windows command shim:
+
+```powershell
+npm.cmd install
+npm.cmd start
+```
+
+To generate a development build without starting the server:
+
+```bash
+npm run build -- --configuration development
+```
+
+To rebuild automatically when source files change, run `npm run watch`.
 
 ## Validate
 
@@ -58,3 +73,7 @@ The Supabase setup and initial SQL baseline are in [BACKEND_ARCHITECTURE.md](./B
 For Supabase setup, apply `supabase-schema.sql`, `supabase-seed-barangays.sql`, and then `supabase-auth-hardening.sql` to the project. Enable Supabase email OTP and configure its Auth email template/SMTP before registering or logging in. The hardening SQL reserves the requested verified email as Superuser and exposes role assignment only through a Superuser-checked database function.
 
 The project includes a PWA manifest and Angular service worker. For local PWA/offline checks, serve a production build on localhost; the development server disables service-worker registration.
+
+## License
+
+This project is licensed under the [MIT License](../LICENSE).
